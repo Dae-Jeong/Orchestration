@@ -9,86 +9,69 @@
 <section id="team" aria-labelledby="team-title">
 <h2 id="team-title">전체 업무 · 역할 내부 작업 · 인계와 검증</h2>
 <p>제품 실행과 마케팅, 공통 HR 리뷰를 한 캔버스로 펼쳤습니다. 역할과 모델 배정은 운영안이며, 상시 실행 중인 agent 구성이 아닙니다.</p>
-<div class="canvas"><svg viewBox="0 0 1420 1380" role="img" aria-label="사용자에서 PM, 기획 디자인 개발 QA 마케팅 HR과 도구를 거쳐 검증 결과와 다음 작업이 다시 PM으로 돌아오는 통합 업무 흐름">
+<div class="canvas"><svg viewBox="0 0 1580 1360" role="img" aria-label="사용자와 공통 기준 및 도구, PM 중심의 네 실행 역할, QA 검증, HR 리뷰와 제품 성과가 연결된 통합 업무 흐름">
 <defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto-start-reverse"><path d="M0 0L7 3.5L0 7" fill="none" stroke="#718c99"/></marker></defs>
-<path d="M48 173H1052Q1070 173 1070 191V465Q1070 483 1088 483H1392Q1410 483 1410 501V1315Q1410 1333 1392 1333H48Q30 1333 30 1315V191Q30 173 48 173Z" fill="#f5faf8" stroke="#83aaa1" stroke-width="2"/>
-<text x="55" y="202" class="small">제품 실행 + 공통 agent 운영 · 논리적 책임 영역</text>
-<rect x="310" y="15" width="450" height="85" rx="10" class="node green"/>
-<text x="333" y="47" class="title">사용자 · 대표</text><text x="333" y="77">원문 소재 · 제품 방향 · 목표 · 허용 효과</text>
-<path d="M485 100V213" class="line"/><text x="500" y="142" class="small">위임 · 기준 합의</text>
-<path d="M660 220V107" class="line return"/><text x="677" y="132" class="small">위임 밖 결정·한도 소진</text>
-<rect x="180" y="220" width="840" height="170" rx="10" class="node green"/>
-<text x="205" y="253" class="title">PM / coordinator · Astra 후보 — 실제로 배정하고 진행을 판단하는 역할</text>
-<text x="205" y="285">원문 근거 → 문제·우선순위·범위 → 기획·QA와 기준 설계 → 역할·모델 배정</text>
-<text x="205" y="316">작업 계약: 입출력 · 완료 조건/검증법 · reviewer · 권한 · 시간/비용/재시도 한도</text>
-<text x="205" y="346">제품 맥락 확인 → Product Workflow + Squad 계약 + 프로젝트 규칙 적용</text>
-<text x="205" y="373" class="small">task_id / revision / criteria hash / depends_on은 별개 · hash는 실행 순서를 정하지 않음</text>
-<path d="M1020 260H1128" class="line"/><text x="1075" y="244" text-anchor="middle" class="small">조회·갱신</text>
-<rect x="1135" y="195" width="245" height="135" rx="10" class="node"/>
-<text x="1155" y="226" class="title">Paperclip · 업무판</text><text x="1155" y="255">담당 · 기준 · blocker</text><text x="1155" y="282">review · 증거 · 상태</text><text x="1155" y="309" class="small">검증 가능한 업무 단위</text>
-<path d="M1020 355H1128" class="line"/><text x="1075" y="343" text-anchor="middle" class="small">실행 요청</text>
-<rect x="1135" y="345" width="245" height="130" rx="10" class="node"/>
-<text x="1155" y="376" class="title">Orca · 실행 수단</text><text x="1155" y="405">제품 workspace · worker</text><text x="1155" y="433">Task / Dispatch · 시도</text><text x="1155" y="459" class="small">질문·결과를 PM에게 반환</text>
-<path d="M557 390V420" class="line"/>
-<text x="550" y="408" text-anchor="end" class="small">담당·시작 조건</text>
-<path d="M1135 420H232V493" class="line"/>
-<path d="M557 420V493" class="line"/><path d="M882 420V493" class="line"/>
-<text x="700" y="406" class="small">준비된 작업 실행</text>
-<rect x="95" y="500" width="275" height="276" rx="10" class="node"/>
-<text x="115" y="531" class="title">기획 · Astra / Sol 후보</text>
-<text x="115" y="567">① 문제·기존 동작</text><text x="115" y="598">② 시나리오·업무 규칙</text><text x="115" y="629">③ 상태·예외·복구</text><text x="115" y="660">④ QA와 수용 조건</text>
-<text x="115" y="706" class="small">산출: 플로우·규칙·기준 연결표</text><text x="115" y="735" class="small">완료: 관찰·검증 가능한 동작</text>
-<rect x="420" y="500" width="275" height="276" rx="10" class="node"/>
-<text x="440" y="531" class="title">디자인 · Astra / Sol 후보</text>
-<text x="440" y="567">① 컨셉·레퍼런스 / UIBowl</text><text x="440" y="598">② 시안·상태 / Pencil</text><text x="440" y="629">③ 피드백·수정</text><text x="440" y="660">④ 토큰·컴포넌트·렌더</text>
-<text x="440" y="706" class="small">산출: 원본·버전/노드·상태</text><text x="440" y="735" class="small">완료: 토큰 매핑·화면 증거</text>
-<rect x="745" y="500" width="275" height="276" rx="10" class="node"/>
-<text x="765" y="531" class="title">개발 · Terra / Sol 후보</text>
-<text x="765" y="567">① 계약·선행 결과 확인</text><text x="765" y="598">② 코드 재사용·토큰 대응</text><text x="765" y="629">③ 구현·테스트</text><text x="765" y="660">④ 브라우저 시각·행동 검증</text>
-<text x="765" y="706" class="small">산출: diff·재현·테스트 증거</text><text x="765" y="735" class="small">완료: 리뷰 가능한 변경/PR</text>
-<path d="M370 590H413" class="line"/><text x="394" y="579" text-anchor="middle" class="small">흐름</text>
-<path d="M695 590H738" class="line"/><text x="719" y="579" text-anchor="middle" class="small">원본</text>
-<path d="M695 653H738" class="line return" marker-start="url(#arrow)"/><text x="719" y="677" text-anchor="middle" class="small">매핑</text>
-<path d="M547 462Q557 444 567 462" fill="none" stroke="#f5faf8" stroke-width="7"/>
-<path d="M325 500V462H547Q557 444 567 462H835V493" class="line"/><text x="675" y="483" text-anchor="middle" class="small">규칙·데이터 경계 → 개발</text>
-<rect x="180" y="845" width="840" height="114" rx="10" class="node green"/>
-<text x="205" y="876" class="title">QA / reviewer · 별도 검증 관점 · 모델 미정</text>
-<text x="205" y="907">초기 기준·검증법 설계 → revision/hash 대조 → 재현 → 기준별 pass / fail / unknown</text>
-<text x="205" y="936" class="small">기획 기준 + 디자인 상태/화면 + 개발 변경/테스트 대조 · 자가 검증은 표시 · 결과와 재현 증거 인계</text>
-<path d="M235 783V838" class="line" marker-start="url(#arrow)"/><text x="251" y="813" class="small">기준 · 초기 검증 협의</text>
-<path d="M557 776V838" class="line"/><text x="572" y="813" class="small">상태·화면</text>
-<path d="M882 776V838" class="line"/><text x="887" y="813" class="small">코드·재현</text>
-<path d="M180 922H60V300H173" class="line return"/><text x="76" y="334" class="small">판정·질문</text><text x="76" y="357" class="small">→ PM 재배정</text>
-<path d="M600 959V986" class="line"/>
-<text x="600" y="1010" text-anchor="middle">PM 판단: pass → 후속 해제 · fail → 담당 수정 · unknown / 한도 소진 → 대기·사람 판단</text>
-<text x="600" y="1040" text-anchor="middle" class="small">선행 검증 완료 + 공유 파일/DB/디자인 writer 충돌 없음 → 병렬 가능 · 아니면 이유를 기록하며 대기</text>
-<rect x="1135" y="500" width="245" height="300" rx="10" class="node"/>
-<text x="1155" y="531" class="title">마케팅 · 모델 미정</text>
-<text x="1155" y="566">① 제품·고객·근거 이해</text><text x="1155" y="597">② 가치·메시지·채널 가설</text>
-<text x="1155" y="628">③ 실험·측정·예산 설계</text><text x="1155" y="659">④ 결과·한계·후속 제안</text>
-<text x="1155" y="701" class="small">PM에 제작 요청 → 디자인·개발</text><text x="1155" y="728" class="small">QA에 측정 정의·이벤트 증거</text>
-<text x="1155" y="757" class="small">성과: 유효 전환·비용·학습</text><text x="1155" y="782" class="small">게시·광고 집행은 허용 범위 내</text>
-<path d="M1110 420V530H1128" class="line"/>
-<path d="M1135 765H1090V900H1027" class="line"/><text x="1100" y="864" class="small">측정 검증</text>
-<path d="M1380 620H1390V156H880V213" class="line return"/><text x="1095" y="144" text-anchor="middle" class="small">고객 근거·실험 결과 → PM</text>
-<rect x="1135" y="930" width="245" height="145" rx="10" class="node"/>
-<text x="1155" y="962" class="title">제품 성과 · 다음 소재</text><text x="1155" y="993">delivery done ≠ outcome</text>
-<text x="1155" y="1024">성공·실패·무효·한계 보존</text><text x="1155" y="1053" class="small">PM·마케팅이 성과 해석</text>
-<path d="M1020 1005H1128" class="line"/><path d="M1255 930V807" class="line return"/><text x="1268" y="890" class="small">다음 가설</text>
-<rect x="180" y="1130" width="840" height="165" rx="10" class="node green"/>
-<text x="205" y="1162" class="title">HR / agent 운영 · 모델 미정 · 여러 제품의 준비 상태·개선 리뷰</text>
-<text x="205" y="1193">역할·도구 온보딩 → 작업 증거 수집 → PM·QA·해당 역할과 리뷰 → 개선안</text>
-<text x="205" y="1224">제품 성과 / 역할 산출물 / 실행 효율 분리 · 프로젝트·난도·표본·실패 원인 확인</text>
-<text x="205" y="1254" class="small">인계: 근거·원인 가설·개선 작업·효과 확인법 → PM 배정 → QA 재검증 / HR 자체 개선은 PM·사용자 검토</text>
-<text x="205" y="1280" class="small">측정 단위: task/revision · 역할/모델/skill 버전 · 결과·재작업·비용 / unknown·환경 실패를 분리</text>
-<path d="M600 1063V1123" class="line"/><text x="617" y="1100" class="small">각 역할·QA의 결과·진행·증거</text>
-<path d="M180 1210H15V240H173" class="line return"/><text x="65" y="1084" class="small">개선안 → PM</text><text x="65" y="1106" class="small">배정·지침 보완</text>
-<rect x="1135" y="1140" width="245" height="155" rx="10" fill="#fff8ec" stroke="#cfb17b" stroke-dasharray="5 4"/>
-<text x="1155" y="1172" class="title">정기 리뷰 · 운영 후보</text>
-<text x="1155" y="1203">이벤트·주기 → HR 리뷰</text><text x="1155" y="1234">새 증거 없으면 종료</text>
-<text x="1155" y="1263" class="small">주기·목표치·예산 미정</text><text x="1155" y="1286" class="small">중복 실행 금지 / 자동 실행 미활성</text>
-<path d="M1135 1210H1027" class="line return"/>
-<text x="45" y="1360" class="small">실선: 배정·산출물 인계   점선: 협의·피드백·재개   |   모델 배정·지표는 후보 · 도구는 교체 가능 · 상세 작업은 제품 repo에서 관리</text>
+<rect x="40" y="175" width="1500" height="1140" rx="18" fill="#f5faf8" stroke="#83aaa1" stroke-width="2"/>
+<text x="65" y="200" class="small">통합 운영</text>
+<rect x="180" y="20" width="290" height="100" rx="10" class="node green"/>
+<text x="200" y="51" class="title">사용자 · 대표</text><text x="200" y="82">제품 방향·목표·허용 효과</text><text x="200" y="105" class="small">위임 밖 판단 · 한도 소진 시 결정</text>
+<rect x="505" y="20" width="400" height="100" rx="10" class="node"/>
+<text x="525" y="51" class="title">제품 맥락 · 공통 기준</text><text x="525" y="82">원문·현재 상태·목표·repo·권한</text><text x="525" y="105" class="small">Product Workflow + Squad 계약 + 프로젝트 규칙</text>
+<rect x="970" y="20" width="240" height="100" rx="10" class="node"/>
+<text x="990" y="51" class="title">Paperclip · 업무판</text><text x="990" y="82">담당·기준·상태·review</text><text x="990" y="105" class="small">blocker · 검증 증거</text>
+<rect x="1245" y="20" width="245" height="100" rx="10" class="node"/>
+<text x="1265" y="51" class="title">Orca · 실행 도구</text><text x="1265" y="82">workspace · worker · 시도</text><text x="1265" y="105" class="small">실행 요청 ⇄ 질문·결과</text>
+<path d="M325 127V223" class="line" marker-start="url(#arrow)"/><text x="342" y="153" class="small">위임·합의</text>
+<path d="M705 120V223" class="line"/><text x="723" y="153" class="small">원본 확인</text>
+<path d="M1090 127V223" class="line" marker-start="url(#arrow)"/><text x="1107" y="153" class="small">조회·갱신</text>
+<path d="M1367 127V223" class="line" marker-start="url(#arrow)"/><text x="1384" y="153" class="small">호출·결과</text>
+<rect x="180" y="230" width="1265" height="140" rx="10" class="node green"/>
+<text x="205" y="263" class="title">PM / coordinator · Astra 후보</text>
+<text x="205" y="294">근거 이해 → 문제·우선순위·범위 → 기획·QA와 기준 설계 → 역할·모델 배정 → 완료·수정·후속 판단</text>
+<text x="205" y="325">작업 계약: 입출력 · 완료 조건/검증법 · reviewer · 권한 · 시간/비용/재시도 한도 · 선행 작업·공유 자원</text>
+<text x="205" y="351" class="small">task_id / revision / criteria hash / depends_on은 별개 · hash로 순서를 정하지 않음 · 기획/개발/마케팅 요청과 HR 개선안을 함께 조율</text>
+<path d="M835 370V412" class="line"/>
+<path d="M1300 420H325V463" class="line"/><path d="M1300 420V463" class="line"/>
+<path d="M650 420V463" class="line"/><path d="M975 420V463" class="line"/>
+<text x="855" y="402" class="small">PM 배정 → Orca 실행 · 선행 검증 완료 + 쓰기 충돌 없음일 때만 병렬</text>
+<rect x="180" y="470" width="290" height="290" rx="10" class="node"/>
+<text x="200" y="502" class="title">기획 · Astra / Sol 후보</text><text x="200" y="541">① 문제·기존 동작</text><text x="200" y="574">② 시나리오·규칙</text><text x="200" y="607">③ 상태·예외·복구</text><text x="200" y="640">④ QA와 수용 조건</text>
+<text x="200" y="687" class="small">인계: 플로우·규칙·기준 연결표</text><text x="200" y="716" class="small">완료: 관찰·검증 가능한 동작</text><text x="200" y="742" class="small">규칙은 개발에 직접 인계</text>
+<rect x="505" y="470" width="290" height="290" rx="10" class="node"/>
+<text x="525" y="502" class="title">디자인 · Astra / Sol 후보</text><text x="525" y="541">① 컨셉·레퍼런스 / UIBowl</text><text x="525" y="574">② 시안·상태 / Pencil</text><text x="525" y="607">③ 피드백·수정</text><text x="525" y="640">④ 토큰·컴포넌트·렌더</text>
+<text x="525" y="687" class="small">인계: 원본·버전/노드·상태</text><text x="525" y="716" class="small">완료: 토큰 매핑·화면 증거</text><text x="525" y="742" class="small">원본 검증과 FE 완료는 별개</text>
+<rect x="830" y="470" width="290" height="290" rx="10" class="node"/>
+<text x="850" y="502" class="title">개발 · Terra / Sol 후보</text><text x="850" y="541">① 계약·선행 결과 확인</text><text x="850" y="574">② 코드 재사용·토큰 대응</text><text x="850" y="607">③ 구현·테스트</text><text x="850" y="640">④ 브라우저 시각·행동 검증</text>
+<text x="850" y="687" class="small">인계: diff·재현·테스트 증거</text><text x="850" y="716" class="small">완료: 리뷰 가능한 변경/PR</text><text x="850" y="742" class="small">구현 결함은 수정 후 재검증</text>
+<rect x="1155" y="470" width="290" height="290" rx="10" class="node"/>
+<text x="1175" y="502" class="title">마케팅 · 모델 미정</text><text x="1175" y="541">① 제품·고객·근거 이해</text><text x="1175" y="574">② 메시지·채널 가설</text><text x="1175" y="607">③ 실험·측정·예산 설계</text><text x="1175" y="640">④ 성과·한계·후속 제안</text>
+<text x="1175" y="687" class="small">인계: 제작 요청·측정 정의</text><text x="1175" y="716" class="small">성과: 유효 전환·비용·학습</text><text x="1175" y="742" class="small">PM 배정 → 기획·디자인·개발</text>
+<path d="M470 586H498" class="line"/><path d="M795 586H823" class="line"/>
+<path d="M802 646H823" class="line return" marker-start="url(#arrow)"/>
+<text x="666" y="797" class="small">상태·화면</text><text x="991" y="797" class="small">코드·재현</text><text x="1316" y="797" class="small">측정 동작</text>
+<text x="341" y="797" class="small">기준·초기 협의</text>
+<path d="M325 767V833" class="line" marker-start="url(#arrow)"/><path d="M650 760V833" class="line"/><path d="M975 760V833" class="line"/><path d="M1300 760V833" class="line"/>
+<rect x="180" y="840" width="1265" height="140" rx="10" class="node green"/>
+<text x="205" y="873" class="title">QA / reviewer · 별도 검증 관점 · 모델 미정</text>
+<text x="205" y="904">초기 기준·검증법 설계 → revision/hash 대조 → 재현 → 기준별 pass / fail / unknown · 자가 검증은 표시</text>
+<text x="205" y="935">PM 판단: pass → 후속 해제 · fail → 담당 수정 · unknown / 한도 소진 → 대기·사람 판단</text>
+<text x="205" y="962" class="small">시각/원본 문제 → 디자인 · 규칙 모호성 → 기획 · 코드 결함 → 개발 · 측정 누락 → 개발·마케팅 / 재배정·기준 변경은 PM과 연결</text>
+<path d="M180 910H120V310H173" class="line return"/><text x="135" y="816" class="small">판정</text>
+<path d="M550 980V1103" class="line"/><text x="567" y="1031" class="small">역할·QA 결과 / 진행·비용·환경·증거</text>
+<path d="M1240 980V1103" class="line"/><text x="1257" y="1031" class="small">성과 관찰</text>
+<rect x="180" y="1110" width="750" height="170" rx="10" class="node green"/>
+<text x="205" y="1143" class="title">HR / agent 운영 · 모델 미정 · 여러 제품 공통 지원</text>
+<text x="205" y="1174">준비·온보딩 → 증거 수집 → PM·QA·직무와 리뷰 → 개선안·효과 확인</text>
+<text x="205" y="1205">제품 성과 / 산출물 품질 / 실행 효율 분리 · 표본·난도·실패 원인 확인</text>
+<text x="205" y="1234" class="small">HR 개선안 → PM 배정 → QA 재검증 / HR 자체 개선은 PM·사용자 검토</text>
+<text x="205" y="1261" class="small">정기 리뷰 후보: 새 증거 없으면 종료 · 주기·지표 목표·예산 미정 · 자동 실행 미활성</text>
+<rect x="1030" y="1110" width="415" height="170" rx="10" class="node"/>
+<text x="1055" y="1143" class="title">제품 성과 · 다음 소재</text><text x="1055" y="1174">PM·마케팅: 고객 행동·전환·비용 해석</text><text x="1055" y="1205">성공·실패·무효·한계 → 다음 가설</text>
+<text x="1055" y="1234" class="small">delivery done ≠ outcome · 게시·집행은 허용 범위 내</text><text x="1055" y="1261" class="small">성과 근거는 HR 리뷰에도 제공</text>
+<path d="M1030 1200H937" class="line"/><text x="980" y="1183" text-anchor="middle" class="small">성과 근거</text>
+<path d="M180 1200H70V255H173" class="line return"/><text x="85" y="1080" class="small">개선안</text>
+<path d="M1445 1200H1505V320H1452" class="line return"/><text x="1505" y="1090" text-anchor="end" class="small">학습 → PM</text>
+<text x="60" y="1345" class="small">실선: 배정·인계 · 점선: 피드백·재개 / 세부 양방향 인계는 아래 표 · 역할/모델은 운영안 · 실행 도구 교체 가능</text>
 </svg></div>
 <p class="note">QA는 최초 기준 설계부터 참여합니다. 결함은 해당 역할로 돌아가고, 범위·기준·권한 변경은 PM이 조율합니다. 역할 간 모든 양방향 인계 조건은 아래 표에 이어집니다.</p>
 <h3>각 역할은 내부에서 어떻게 작업하는가</h3>
