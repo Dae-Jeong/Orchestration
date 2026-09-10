@@ -1,11 +1,37 @@
 <!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>모델 · 역할 · 업무 프로세스</title>
 <style>*{box-sizing:border-box}body{margin:0;background:#f4f6f8;color:#18323d;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif}main{max-width:1220px;margin:auto;padding:32px}h1{font-size:28px;margin:8px 0}p{line-height:1.7;color:#536b76;font-size:14px}.kicker{letter-spacing:2px;font-size:12px;color:#507c7b}h2{font-size:19px;margin:27px 0 12px}.canvas{background:white;border:1px solid #d5e1e7;border-radius:12px;padding:12px;overflow:auto}svg{display:block;width:100%;min-width:900px}svg text{font-family:inherit;fill:#193641;font-size:16px}.small{font-size:13px;fill:#57717b}.title{font-size:18px;font-weight:700}.node{fill:white;stroke:#b8ccd5;stroke-width:1.3}.green{fill:#edf7f3;stroke:#79ac99}.line{fill:none;stroke:#718c99;stroke-width:1.7;marker-end:url(#arrow)}.return{stroke-dasharray:6 5}.table{overflow:auto}table{border-collapse:collapse;width:100%;min-width:780px;background:#fff;font-size:14px}td,th{text-align:left;padding:13px 16px;border-bottom:1px solid #dde6eb;line-height:1.6}th{background:#eaf1f4;color:#4b6673;font-size:12px}td:first-child{font-weight:650;width:160px}td:nth-child(2){width:190px}.badge{background:#fff0d6;color:#815c1e;border-radius:4px;padding:4px 8px;font-size:12px}.actual{background:#e5f2ed;color:#1c6851}.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.note{border-left:3px solid #749e9a;padding-left:15px}a{color:#176e67}footer{margin-top:25px;font-size:12px;color:#667f8b}@media(max-width:700px){main{padding:20px 16px}.grid{grid-template-columns:1fr}}
 .team{border:2px solid #8aaea9;border-radius:16px;background:#f9fcfb;padding:22px;margin-top:22px}.team-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}.team-heading h2{margin:8px 0}.team-tools{font-size:13px;line-height:1.9;background:#eaf3f0;padding:12px 16px;margin:15px 0;border-radius:7px;color:#43635f}.team-tools span{padding:0 12px;color:#9ab3ad}.team h3{font-size:17px;margin:27px 0 14px}.role-lanes{background:white;border:1px solid #d4e2df;border-radius:9px;overflow:hidden}.role-lane{display:grid;grid-template-columns:175px 1fr;gap:18px;padding:20px;border-bottom:1px solid #dce7e4}.role-lane:last-child{border:0}.role-lane h4{font-size:17px;margin:2px 0 12px}.role-lane ol{display:flex;flex-wrap:wrap;gap:9px;list-style:none;padding:0;margin:0 0 12px;counter-reset:step}.role-lane li{font-size:13px;background:#edf4f4;border-radius:4px;padding:7px 9px}.role-lane li:before{counter-increment:step;content:counter(step) ". ";font-weight:700;color:#26776e}.role-lane p{font-size:13px;line-height:1.75;margin:5px 0}.handoffs td:first-child{width:175px;white-space:nowrap}.handoffs td:nth-child(2){width:300px}@media(max-width:700px){.team{padding:12px}.team-heading{display:block}.role-lane{grid-template-columns:1fr;padding:15px}.role-lane ol{display:grid;grid-template-columns:1fr 1fr}}
+
+#overview .line{marker-end:url(#overview-arrow)}.view-nav{display:flex;flex-wrap:wrap;gap:10px;margin:23px 0}.view-nav a,.back-link{font-size:13px;text-decoration:none;background:#e6f0ee;padding:8px 12px;border-radius:5px;display:inline-block}.zoom-link{display:flex;align-items:center;justify-content:center;gap:18px;padding:20px 12px;color:#57736e;font-size:14px;border-bottom:2px dashed #8aaea9}.zoom-link a{font-weight:700}.back-link{margin-left:10px}svg a:hover .node{stroke:#176e67;stroke-width:2.5}svg a:focus-visible{outline:2px solid #176e67}.role-lane:target{background:#eaf7f0;outline:2px solid #3e8e7d;outline-offset:-2px}section,h3,.role-lane{scroll-margin-top:20px}
 </style><main>
 <div class="kicker">MODEL → ROLE → HANDOFF</div><h1>어떤 모델이, 어떤 역할로, 어떻게 일하는가</h1>
 <p><b>PM의 업무 계약은 도구와 분리합니다.</b> 아래는 현재 연결안: Paperclip은 업무판, Orca는 제품별 worker의 실행 수단입니다.</p>
-<section class="team" aria-labelledby="team-title">
-<div class="team-heading"><div><span class="kicker">ONE DELIVERY TEAM · 논리적 책임 영역</span><h2 id="team-title">PM · 기획 · 디자인 · 개발 · QA</h2></div><span class="badge">모델 배정안 · 상시 팀 미기동</span></div>
+<nav class="view-nav" aria-label="전체와 상세 이동"><a href="#overview">1 전체 업무 흐름</a><a href="#team">2 실행 팀 상세</a><a href="#handoff-map">3 역할 간 인계</a><a href="#review-loop">4 주기 점검</a></nav>
+<section id="overview" aria-labelledby="overview-title">
+<h2 id="overview-title">1. 전체 업무 흐름 · 누가 지시하고 어디에서 실행하는가</h2>
+<p>앞서 정리한 전체 흐름입니다. <b>그림의 PM·기획·디자인·개발·QA를 누르면 아래 같은 역할의 내부 흐름으로 이동</b>합니다.</p>
+<div class="canvas"><svg viewBox="0 0 1120 540" role="img" aria-label="사용자와 총괄이 계약을 정하고 PM 기획 QA가 기준을 설계한 뒤 디자인 개발 검증과 사용자 판단으로 인계하는 제안 흐름">
+<defs><marker id="overview-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7" fill="none" stroke="#718c99"/></marker></defs>
+<rect x="30" y="30" width="230" height="85" rx="9" class="node green"/><text x="50" y="61" class="title">사용자 · 대표</text><text x="50" y="88">소재 · 제품 방향 · 허용 효과</text>
+<a href="#role-pm" aria-label="role-pm 상세 보기"><path d="M260 72H305" class="line"/><rect x="312" y="30" width="490" height="85" rx="9" class="node green"/><text x="335" y="61" class="title">PM / coordinator · Astra 배정안</text><text x="335" y="88">프레임워크 적용 · 작업 분해 · 역할/모델 배분 · 인계와 진행 판단</text></a>
+<path d="M802 72H845" class="line"/><rect x="852" y="30" width="240" height="85" rx="9" class="node"/><text x="872" y="61" class="title">Paperclip · 공통 업무판</text><text x="872" y="88" class="small">기준 · 담당 · blocker · review · 증거</text>
+<path d="M557 115V159" class="line"/><text x="577" y="144" class="small">Product Workflow + Squad 계약 + 프로젝트 규칙</text>
+<a href="#role-planning" aria-label="role-planning 상세 보기"><rect x="220" y="166" width="580" height="80" rx="9" class="node"/><text x="242" y="196" class="title">PM + 기획/QA · 기준 설계·역할 배정</text><text x="242" y="224">입출력 · 모델/도구 · 기준·권한·한도 · 의존성·공유 자원</text></a>
+<path d="M800 206H845" class="line"/><rect x="852" y="166" width="240" height="80" rx="9" class="node green"/><text x="872" y="196" class="title">Orca · 실제 실행 조율</text><text x="872" y="224" class="small">workspace · worker · 실행 시도</text>
+<path d="M972 246V273H188V307" class="line"/><path d="M552 273V307" class="line"/>
+<a href="#role-design" aria-label="role-design 상세 보기"><rect x="30" y="314" width="315" height="113" rx="9" class="node"/><text x="50" y="344" class="title">디자인 · Astra / Sol 배정안</text><text x="50" y="372">UIBowl → Pencil → 리뷰</text><text x="50" y="399" class="small">산출: 원본·노드·상태·토큰·렌더 증거</text></a>
+<path d="M345 369H388" class="line"/><text x="365" y="353" text-anchor="middle" class="small">인계</text>
+<a href="#role-development" aria-label="role-development 상세 보기"><rect x="395" y="314" width="315" height="113" rx="9" class="node"/><text x="415" y="344" class="title">개발 · Terra / Sol 배정안</text><text x="415" y="372">기존 코드 재사용 → 구현 → 검증</text><text x="415" y="399" class="small">산출: diff·테스트·화면/행동 증거</text></a>
+<path d="M710 369H753" class="line"/>
+<a href="#role-qa" aria-label="role-qa 상세 보기"><rect x="760" y="314" width="332" height="113" rx="9" class="node green"/><text x="780" y="344" class="title">QA / reviewer · 별도 검증 관점</text><text x="780" y="372">합의된 revision/hash의 기준별 판정</text><text x="780" y="399" class="small">pass / fail / unknown · 자가 검증 표시</text></a>
+<path d="M927 427V472H552V433" class="line return"/><text x="745" y="493" text-anchor="middle" class="small">fail → PM이 수정 담당 배정 / 한도 소진·기준 변경 → PM과 사람 판단</text>
+<text x="558" y="529" text-anchor="middle" class="small">Orca 결과 → PM/QA 검증 → Paperclip 갱신 → 후속 작업 / 성과 확인</text>
+</svg></div>
+
+<div class="zoom-link"><span>전체 흐름의 역할 실행 부분을 펼치면</span><a href="#team">↓ 2. 실행 팀 내부 · 역할별 작업과 인계</a></div>
+</section>
+<section id="team" class="team" aria-labelledby="team-title">
+<div class="team-heading"><div><span class="kicker">ONE DELIVERY TEAM · 논리적 책임 영역</span><h2 id="team-title">2. 실행 팀 상세 · PM · 기획 · 디자인 · 개발 · QA</h2></div><a class="back-link" href="#overview">↑ 전체 업무 흐름으로</a></div>
 <p>모든 역할은 같은 task 기준·권한·증거를 공유합니다. PM이 배정과 진행을 조율하고, 각 역할은 전문 판단과 상세 실행을 맡습니다.</p>
 <div class="team-tools"><b>사용자</b> 목표·허용 범위 ⇄ PM <span>|</span> <b>공통 기준</b> Product Workflow + Squad 계약 + 프로젝트 규칙 <span>|</span> <b>현재 도구</b> Paperclip 업무판 · Orca 실행</div>
 <div class="canvas"><svg viewBox="0 0 1120 540" role="img" aria-label="PM이 기획 디자인 개발 QA를 조율하는 실행 팀. 기획에서 디자인과 개발, 디자인에서 개발과 QA, 개발에서 QA로 인계하고 QA는 최초 기준 설계와 결과 판정에 참여한다. 모든 구체 인계와 실패 귀환은 아래 표에 명시한다.">
@@ -29,14 +55,14 @@
 
 <h3>각 역할은 내부에서 어떻게 작업하는가</h3>
 <div class="role-lanes">
-<article class="role-lane"><div><h4>PM / coordinator</h4><span class="badge">Astra 후보</span></div><div><ol><li>원문·제품 맥락 읽기</li><li>문제·우선순위·범위 정리</li><li>기획·QA와 기준 설계</li><li>역할·모델·도구 배정</li><li>질문·검증·후속 조율</li></ol><p><b>받는 것</b> 사용자 목표·권한, 각 역할의 질문·증거 → <b>내보내는 것</b> 작업 계약, 담당/한도, 다음 시작·대기 조건. 성과 관찰은 새 소재로 연결.</p><p><b>막히면</b> 근거 부족은 조사로, 위임 밖의 방향·기준·권한 변경이나 한도 소진은 사용자에게. 반복 승인은 하지 않음.</p></div></article>
-<article class="role-lane"><div><h4>기획</h4><span class="badge">Astra / Sol 후보</span></div><div><ol><li>문제·기존 동작 확인</li><li>사용자 시나리오</li><li>업무 규칙·상태 전이</li><li>예외·복구 조건</li><li>QA와 수용 조건 정리</li></ol><p><b>받는 것</b> PM의 문제·범위, QA 질문 → <b>디자인에</b> 플로우·상태 / <b>개발에</b> 규칙·데이터 경계 / <b>QA에</b> 기준 연결표.</p><p><b>막히면</b> 문제·범위는 PM에게. 디자인/개발에서 발견한 행동 모순은 기획에서 수정하고 기준 영향은 PM과 확인.</p></div></article>
-<article class="role-lane"><div><h4>디자인</h4><span class="badge">Astra / Sol 후보</span></div><div><ol><li>플로우·컨셉 확인</li><li>레퍼런스·선택 이유</li><li>시안·인터랙션 상태</li><li>피드백·수정</li><li>토큰·컴포넌트·렌더</li></ol><p><b>현재 도구</b> UIBowl 레퍼런스 → Pencil 원본. <b>개발·QA에</b> 버전/노드·상태·토큰 매핑·viewport 증거·미구현 목록.</p><p><b>막히면</b> 시각 결함은 디자인 수정, 행동·정책 모순은 기획, 방향 변경은 PM. 공유 원본 writer 충돌은 대기. 캔버스 검증과 FE 완료는 별개.</p></div></article>
-<article class="role-lane"><div><h4>개발</h4><span class="badge">Terra / Sol 후보</span></div><div><ol><li>계약·선행 산출물 확인</li><li>기존 코드·토큰 대응</li><li>작은 변경 구현</li><li>테스트·화면/행동 검증</li><li>리뷰 가능한 변경 인계</li></ol><p><b>받는 것</b> 기획 규칙·디자인 원본·허용 환경 → <b>QA에</b> commit/diff, 실행 환경, 재현 절차, 기준별 증거. 첫 도착점은 검증된 FE 변경 PR 제안.</p><p><b>막히면</b> 구현 결함은 개발 수정, 원본/매핑 누락은 디자인, 규칙 모순은 기획, 새 권한·비용은 PM. 자동 배포 권한을 추론하지 않음.</p></div></article>
-<article class="role-lane"><div><h4>QA / reviewer</h4><span class="badge">검증자·모델 미정</span></div><div><ol><li>초기 기준·검증법 설계</li><li>revision/hash 대조</li><li>정상·예외·회귀 재현</li><li>기준별 판정·증거</li><li>귀환·재검증·PM 보고</li></ol><p><b>받는 것</b> 기획 기준, 디자인 상태/화면, 개발 변경/재현 → <b>PM에</b> pass/fail/unknown, 검증자와 근거. 자가 검증은 독립 검증으로 부르지 않음.</p><p><b>막히면</b> 기준 모호성은 기획·PM, 시각/원본 문제는 디자인, 코드 결함은 개발. 재현 불가는 unknown으로 남기고 필요한 자료를 요청.</p></div></article>
+<article id="role-pm" class="role-lane"><div><h4>PM / coordinator</h4><span class="badge">Astra 후보</span></div><div><ol><li>원문·제품 맥락 읽기</li><li>문제·우선순위·범위 정리</li><li>기획·QA와 기준 설계</li><li>역할·모델·도구 배정</li><li>질문·검증·후속 조율</li></ol><p><b>받는 것</b> 사용자 목표·권한, 각 역할의 질문·증거 → <b>내보내는 것</b> 작업 계약, 담당/한도, 다음 시작·대기 조건. 성과 관찰은 새 소재로 연결.</p><p><b>막히면</b> 근거 부족은 조사로, 위임 밖의 방향·기준·권한 변경이나 한도 소진은 사용자에게. 반복 승인은 하지 않음.</p></div></article>
+<article id="role-planning" class="role-lane"><div><h4>기획</h4><span class="badge">Astra / Sol 후보</span></div><div><ol><li>문제·기존 동작 확인</li><li>사용자 시나리오</li><li>업무 규칙·상태 전이</li><li>예외·복구 조건</li><li>QA와 수용 조건 정리</li></ol><p><b>받는 것</b> PM의 문제·범위, QA 질문 → <b>디자인에</b> 플로우·상태 / <b>개발에</b> 규칙·데이터 경계 / <b>QA에</b> 기준 연결표.</p><p><b>막히면</b> 문제·범위는 PM에게. 디자인/개발에서 발견한 행동 모순은 기획에서 수정하고 기준 영향은 PM과 확인.</p></div></article>
+<article id="role-design" class="role-lane"><div><h4>디자인</h4><span class="badge">Astra / Sol 후보</span></div><div><ol><li>플로우·컨셉 확인</li><li>레퍼런스·선택 이유</li><li>시안·인터랙션 상태</li><li>피드백·수정</li><li>토큰·컴포넌트·렌더</li></ol><p><b>현재 도구</b> UIBowl 레퍼런스 → Pencil 원본. <b>개발·QA에</b> 버전/노드·상태·토큰 매핑·viewport 증거·미구현 목록.</p><p><b>막히면</b> 시각 결함은 디자인 수정, 행동·정책 모순은 기획, 방향 변경은 PM. 공유 원본 writer 충돌은 대기. 캔버스 검증과 FE 완료는 별개.</p></div></article>
+<article id="role-development" class="role-lane"><div><h4>개발</h4><span class="badge">Terra / Sol 후보</span></div><div><ol><li>계약·선행 산출물 확인</li><li>기존 코드·토큰 대응</li><li>작은 변경 구현</li><li>테스트·화면/행동 검증</li><li>리뷰 가능한 변경 인계</li></ol><p><b>받는 것</b> 기획 규칙·디자인 원본·허용 환경 → <b>QA에</b> commit/diff, 실행 환경, 재현 절차, 기준별 증거. 첫 도착점은 검증된 FE 변경 PR 제안.</p><p><b>막히면</b> 구현 결함은 개발 수정, 원본/매핑 누락은 디자인, 규칙 모순은 기획, 새 권한·비용은 PM. 자동 배포 권한을 추론하지 않음.</p></div></article>
+<article id="role-qa" class="role-lane"><div><h4>QA / reviewer</h4><span class="badge">검증자·모델 미정</span></div><div><ol><li>초기 기준·검증법 설계</li><li>revision/hash 대조</li><li>정상·예외·회귀 재현</li><li>기준별 판정·증거</li><li>귀환·재검증·PM 보고</li></ol><p><b>받는 것</b> 기획 기준, 디자인 상태/화면, 개발 변경/재현 → <b>PM에</b> pass/fail/unknown, 검증자와 근거. 자가 검증은 독립 검증으로 부르지 않음.</p><p><b>막히면</b> 기준 모호성은 기획·PM, 시각/원본 문제는 디자인, 코드 결함은 개발. 재현 불가는 unknown으로 남기고 필요한 자료를 요청.</p></div></article>
 </div>
 
-<h3>역할 간 인계·피드백 계약</h3>
+<h3 id="handoff-map">3. 역할 간 인계·피드백 계약 <a class="back-link" href="#overview">↑ 전체 흐름</a></h3>
 <p>역할 간 전문 질문은 직접 주고받을 수 있습니다. 작업 범위·기준·우선순위의 변경과 재배정은 PM이 조율하고 업무 기록에 남깁니다.</p>
 <div class="table handoffs"><table><thead><tr><th>연결</th><th>넘기는 내용</th><th>수신 측 확인 / 실패 귀환</th></tr></thead><tbody>
 <tr><td>사용자 ⇄ PM</td><td>목표·원문·허용 효과 ⇄ 결과·위임 밖 결정</td><td>기존 합의 재사용. 새 방향·권한·한도 판단만 사용자에게.</td></tr>
@@ -54,7 +80,7 @@
 </tbody></table></div>
 <p class="note"><b>공통 인계 봉투:</b> task_id · revision/hash · 입력/권한 · 완료 기준 · 현재 결과/증거 · 남은 일 · 질문 · 외부 효과 · 남은 한도 · 재개 조건. 앱 ID는 별도 연결 기록입니다.</p>
 </section>
-<h2>주기 점검 루프 · 아직 제안</h2>
+<h2 id="review-loop">4. 주기 점검 루프 · 아직 제안</h2>
 <p class="note"><b>깨움 → 변경 확인 → PM 판단 → 범위 안 실행/대기 → 검증·기록 → 다음 깨움.</b>
 새 일이 없으면 실행 없이 종료하고, 활성 시도가 있으면 중복 시작하지 않습니다.
 이벤트 반응에 주기적 누락 점검을 보태는 방식이 후보입니다. 대상·주기·비용/시간 한도를
