@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$ROOT"
+set -a
+. "$ROOT/.env.paperclip"
+set +a
+: "${DATABASE_URL:?External database is required}"
+case "$DATABASE_URL" in
+  postgresql://orchestration_paperclip:*@127.0.0.1:5433/orchestration_paperclip) ;;
+  *) printf '%s\n' 'Unexpected database target; refusing to start.' >&2; exit 1 ;;
+esac
+export PATH="$ROOT/.runtime/fnm/node-versions/v24.21.0/installation/bin:$PATH"
+exec node "$ROOT/node_modules/paperclipai/dist/index.js" "$@"

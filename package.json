@@ -1,0 +1,10 @@
+{
+  "name": "personal-orchestration",
+  "version": "1.0.0",
+  "description": "사용자의 소재를 PM·기획·디자인·개발 관점에서 작업으로 구체화하고, 완료 기준과 의존성에 따라 실행·검증·후속 작업을 이어가는 개인용 스쿼드 운영 실험 프로젝트입니다.",
+  "scripts": {},
+  "dependencies": {
+    "paperclipai": "2026.831.1"
+  },
+  "private": true
+}

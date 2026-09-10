@@ -1,0 +1,173 @@
+{
+  "intake": {
+    "outcome": "Verify the task coordination model on synthetic work",
+    "evidence": "User requested a personal orchestration model",
+    "status": "proposal"
+  },
+  "tasks": [
+    {
+      "task_id": "SQUAD-001",
+      "role": "pm-planning",
+      "title": "Behavior contract",
+      "depends_on": [],
+      "contract": {
+        "revision": 1,
+        "acceptance": [
+          "Behavior contract has a reviewable artifact and stated limits"
+        ],
+        "verification": "Inspect synthetic artifact against the behavior contract",
+        "authority": {
+          "allowed": "Synthetic pilot artifacts only",
+          "excluded": "Product changes, deployment, messages, paid models",
+          "budget": "No external API calls"
+        },
+        "resources": [
+          {
+            "key": "pilot/contract",
+            "mode": "write"
+          }
+        ],
+        "decision": {
+          "status": "proposed",
+          "human": null,
+          "reference": null
+        }
+      },
+      "criteria_hash": "cd988e9d7a15c073f4c413222d768c754c961a0b297e660f555f06bb89cef6ac",
+      "evidence": []
+    },
+    {
+      "task_id": "SQUAD-002",
+      "role": "design",
+      "title": "Screen flow",
+      "depends_on": [
+        "SQUAD-001"
+      ],
+      "contract": {
+        "revision": 1,
+        "acceptance": [
+          "Screen flow has a reviewable artifact and stated limits"
+        ],
+        "verification": "Inspect synthetic artifact against the behavior contract",
+        "authority": {
+          "allowed": "Synthetic pilot artifacts only",
+          "excluded": "Product changes, deployment, messages, paid models",
+          "budget": "No external API calls"
+        },
+        "resources": [
+          {
+            "key": "pilot/design",
+            "mode": "write"
+          }
+        ],
+        "decision": {
+          "status": "proposed",
+          "human": null,
+          "reference": null
+        }
+      },
+      "criteria_hash": "71a7596acb0973af1fa6bc03b46d183f0cb42b60c6d6863bba9bf9bfff5892b7",
+      "evidence": []
+    },
+    {
+      "task_id": "SQUAD-003",
+      "role": "development",
+      "title": "API fixture",
+      "depends_on": [
+        "SQUAD-001"
+      ],
+      "contract": {
+        "revision": 1,
+        "acceptance": [
+          "API fixture has a reviewable artifact and stated limits"
+        ],
+        "verification": "Inspect synthetic artifact against the behavior contract",
+        "authority": {
+          "allowed": "Synthetic pilot artifacts only",
+          "excluded": "Product changes, deployment, messages, paid models",
+          "budget": "No external API calls"
+        },
+        "resources": [
+          {
+            "key": "pilot/api",
+            "mode": "write"
+          }
+        ],
+        "decision": {
+          "status": "proposed",
+          "human": null,
+          "reference": null
+        }
+      },
+      "criteria_hash": "6a252436e344e93d5f6f528b70871cd2aaf544e68512c30cd8e7323c61d1405b",
+      "evidence": []
+    },
+    {
+      "task_id": "SQUAD-004",
+      "role": "verification",
+      "title": "Integration check",
+      "depends_on": [
+        "SQUAD-002",
+        "SQUAD-003"
+      ],
+      "contract": {
+        "revision": 1,
+        "acceptance": [
+          "Integration check has a reviewable artifact and stated limits"
+        ],
+        "verification": "Inspect synthetic artifact against the behavior contract",
+        "authority": {
+          "allowed": "Synthetic pilot artifacts only",
+          "excluded": "Product changes, deployment, messages, paid models",
+          "budget": "No external API calls"
+        },
+        "resources": [
+          {
+            "key": "pilot/integration",
+            "mode": "write"
+          }
+        ],
+        "decision": {
+          "status": "proposed",
+          "human": null,
+          "reference": null
+        }
+      },
+      "criteria_hash": "d2f4bf8b2f67ccf4440903ae010fcf7329b4c0406f0782c4673c15c938a7dc7b",
+      "evidence": []
+    },
+    {
+      "task_id": "SQUAD-005",
+      "role": "user",
+      "title": "Review outcome",
+      "depends_on": [
+        "SQUAD-004"
+      ],
+      "contract": {
+        "revision": 1,
+        "acceptance": [
+          "Review outcome has a reviewable artifact and stated limits"
+        ],
+        "verification": "Inspect synthetic artifact against the behavior contract",
+        "authority": {
+          "allowed": "Synthetic pilot artifacts only",
+          "excluded": "Product changes, deployment, messages, paid models",
+          "budget": "No external API calls"
+        },
+        "resources": [
+          {
+            "key": "pilot/decision",
+            "mode": "write"
+          }
+        ],
+        "decision": {
+          "status": "proposed",
+          "human": null,
+          "reference": null
+        }
+      },
+      "criteria_hash": "c96cbb11499090c01545fc7b45a043895764a336c7c56627cba34e6356695994",
+      "evidence": []
+    }
+  ]
+}

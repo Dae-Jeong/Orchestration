@@ -1,0 +1,9 @@
+#!/bin/sh
+# Project-local Node and locked official npm distribution; does not create a DB.
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$ROOT"
+command -v fnm >/dev/null
+fnm install 24.21.0 --fnm-dir "$ROOT/.runtime/fnm"
+fnm exec --fnm-dir "$ROOT/.runtime/fnm" --using 24.21.0 npm ci --ignore-scripts
+printf '%s\n' 'Installed. Configure the existing PostgreSQL target before onboarding.'
