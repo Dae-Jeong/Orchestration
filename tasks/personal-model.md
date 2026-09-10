@@ -41,3 +41,16 @@ review 반복 후 사람 상향, crash 후 외부 효과 중복 방지, 변경 �
 다음 선택지: (1) 현재 무료 fixture로 native review 전환을 더 검증, (2) 단일 Codex executor에
 실제 소재·권한·횟수/시간/비용 한도를 정해 한 번 실행, (3) 그 결과 이후 역할별 분리 판단.
 새로운 기본 재시도/예산/검토 정책은 후보이며 이번 문서로 상시 실행을 승인하지 않는다.
+
+## Orca 브라우저 설정 · 2026-09-10
+
+사용자 요청으로 실제 브라우저 UI에서 기존 Personal Orchestration Model 프로젝트를 정리했다.
+Configuration → Codebase에서 개인 GitHub 저장소를 연결하고 기존 local-model workspace를
+유지했다. 프로젝트 설명과 PRODUCT_WORKFLOW_FILE 환경 변수도 저장했다. 경로 값은 DB에만 둔다.
+ORC-2~6을 각각 Properties → Project로 이 프로젝트에 연결했다. 모두 backlog이며 기존
+blocker/approval은 유지했다. 새로운 회사나 중복 workspace, 유료 agent는 생성하지 않았다.
+
+검증: UI 저장 후 API 재조회에서 repo URL, workspace 1개, 설명, 환경 변수 키와 프로젝트
+소속 이슈 5개 확인. Orca 설정 탭 URL:
+http://127.0.0.1:13100/ORC/projects/personal-orchestration-model/configuration
+일반 workspace 연결은 Codebase에 표시되며, 실험적 작업별 격리 workspace는 계속 비활성이다.
