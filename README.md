@@ -3,6 +3,14 @@
 소재를 PM/기획·디자인·개발의 작업으로 구체화하고, 완료 조건·권한·의존성·검증 증거를
 연결하는 개인 운영 모델입니다. Paperclip을 상태와 실행 기반으로 사용하며 별도 scheduler는 없습니다.
 
+## 업무 흐름과 역할
+
+![사용자·PM·기획·디자인·개발·QA와 Paperclip·Orca를 연결한 통합 업무 흐름](docs/images/model-process.png)
+
+[이미지 크게 보기](docs/images/model-process.png) · [원본 흐름도와 역할별 인계 상세](tasks/model-process.html)
+
+모델 배정과 주기 점검 루프는 운영안이며, 상시 실행 중인 agent 구성을 뜻하지 않습니다.
+
 ## 현재 결과
 
 2026-09-10: Paperclip 2026.831.1 설치, UI, 전용 DB, 앱 종료/재시작 후 상태 보존 검증 완료.
