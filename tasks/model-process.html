@@ -71,7 +71,7 @@
 <path d="M1030 1200H937" class="line"/><text x="980" y="1183" text-anchor="middle" class="small">성과 근거</text>
 <path d="M180 1200H70V255H173" class="line return"/><text x="85" y="1080" class="small">개선안</text>
 <path d="M1445 1200H1505V320H1452" class="line return"/><text x="1505" y="1090" text-anchor="end" class="small">학습 → PM</text>
-<text x="60" y="1345" class="small">실선: 배정·인계 · 점선: 피드백·재개 / 세부 양방향 인계는 아래 표 · 역할/모델은 운영안 · 실행 도구 교체 가능</text>
+<text x="60" y="1345" class="small">실선: 배정·인계 · 점선: 피드백·재개 / 세부 인계는 상세 HTML 참조 · 역할/모델은 운영안 · 실행 도구 교체 가능</text>
 </svg></div>
 <p class="note">QA는 최초 기준 설계부터 참여합니다. 결함은 해당 역할로 돌아가고, 범위·기준·권한 변경은 PM이 조율합니다. 역할 간 모든 양방향 인계 조건은 아래 표에 이어집니다.</p>
 <h3>각 역할은 내부에서 어떻게 작업하는가</h3>
@@ -126,6 +126,6 @@
 <tr><td>gpt-5.5 / Spark</td><td>로컬 Codex 목록</td><td>현재 역할 미배정. 목록에 있다는 이유만으로 팀에 추가하지 않음.</td></tr>
 <tr><td>process probe</td><td><span class="badge actual">무료 파일/계약 검사</span></td><td>LLM이 아님. skill 읽기·정적 검사만 수행.</td></tr>
 </tbody></table></div>
-<div class="grid"><section><h2>작게 시작하는 실행 단위</h2><p><b>총괄 1 + 필요한 실행자 + 검증자</b>로 시작합니다. PM·기획을 한 세션이 맡을 수 있고, 디자인이 필요 없는 작업은 개발로 바로 보냅니다. 작성자와 검증자가 같으면 독립 검증으로 포장하지 않습니다.</p><p>모델을 바꿔도 task ID·기준·권한·증거와 인계 계약은 유지합니다. 실제 모델 배정은 작업의 난도·도구 접근·한도·검증 결과를 보고 확정합니다.</p></section><section><h2>실제 설정은 어디까지인가</h2><p>Paperclip의 <b>Design Readiness</b>는 codex_local / paused이며 모델명이 고정되지 않았습니다. 전용 home도 호스트 기본 모델을 명시적으로 복사하지 않아, Astra로 실행된다고 단정할 수 없습니다.</p><p>Pencil 연결은 성공, UIBowl은 인증 401입니다. 별도 PM·개발·QA executor나 자동 역할 배정은 아직 구성하지 않았습니다.</p></section></div>
+<div class="grid"><section><h2>작게 시작하는 실행 단위</h2><p><b>총괄 1 + 필요한 실행자 + 검증자</b>로 시작합니다. PM·기획을 한 세션이 맡을 수 있고, 디자인이 필요 없는 작업은 개발로 바로 보냅니다. 작성자와 검증자가 같으면 독립 검증으로 포장하지 않습니다.</p><p>모델을 바꿔도 task ID·기준·권한·증거와 인계 계약은 유지합니다. 실제 모델 배정은 작업의 난도·도구 접근·한도·검증 결과를 보고 확정합니다.</p></section><section><h2>실제 설정은 어디까지인가</h2><p>Paperclip의 <b>Design Readiness</b>는 codex_local / paused이며 모델명이 고정되지 않았습니다. 전용 home도 호스트 기본 모델을 명시적으로 복사하지 않아, Astra로 실행된다고 단정할 수 없습니다.</p><p>Pencil 연결은 성공, UIBowl은 인증 401입니다. Paperclip 상시 역할 agent와 자동 역할 배정은 미구성입니다. Orca 단발 QA·HR 실행은 <a href="first-live-pilot.md">첫 실제 시범 기록</a>에서 별도로 확인합니다.</p></section></div>
 <footer>2026-09-10 · 근거: 호스트 Codex 설정, 로컬 model cache, Paperclip agent API. 로컬 목록은 실시간 사용 자격·성능·비용 검증이 아닙니다.<br><a href="model-process.md">결정과 검증 기록</a> · <a href="portfolio-overview.html">이전 프로젝트 현황 보기</a></footer>
 </main></html>

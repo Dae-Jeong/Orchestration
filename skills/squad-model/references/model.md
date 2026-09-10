@@ -39,7 +39,7 @@ flowchart TD
   I[Intake] --> C[Role coordination and task contracts]
   C --> A[User criteria and authority recorded]
   A --> R{Predecessors and resources ready?}
-  R -->|yes| E[Paperclip execution]
+  R -->|yes| E[Assigned execution tool]
   R -->|no| W[Persist waiting reason]
   E --> V{Evidence matches agreed revision?}
   V -->|pass| D[Verified completion]
