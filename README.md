@@ -1,7 +1,11 @@
-# Personal Orchestration
+# Obsidian + Orchestration
 
 여러 제품의 업무를 PM 중심으로 조율하는 개인 오케스트레이션 모델.
 **PM이 배정하고, Paperclip에 기록하고, Orca에서 실행합니다.**
+
+Obsidian의 로컬 LLM Wiki에서 프로젝트 맥락과 이전 결과를 읽고, 검증된 작업 결과를 다시
+위키에 연결합니다. 이 repo는 실행 모델과 도구를 소유하며 위키 진입점은 Git-ignored
+`AGENTS.local.md`에 둡니다. [지식·실행 연결](docs/obsidian-orchestration.md)을 참고하세요.
 
 ## 업무 흐름
 
@@ -108,6 +112,9 @@ python3 -m unittest discover -s tests -v
 계약 검사는 실제 agent 수행·제품 성과 검증과 별개입니다.
 
 ## 문서·데이터
+
+`tasks/`는 Git에 올리지 않는 로컬 작업 기록입니다. 아래와 본문의 `tasks/` 링크는
+이 머신에 기록이 있을 때만 열립니다. 공유할 운영 기준·검증된 사실은 `docs/`가 소유합니다.
 
 | 문서 | 내용 |
 | --- | --- |
