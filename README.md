@@ -58,6 +58,10 @@ telemetry는 DO_NOT_TRACK=1로 끕니다. 비밀은 chmod 600으로 보호하고
 
 ## 모델 사용과 검증
 
+[여러 프로젝트의 소유 구조·작업 흐름·현황 시각화](tasks/portfolio-overview.html)를
+브라우저에서 열 수 있습니다. [조사 근거](tasks/portfolio-overview.md)는 2026-09-10
+snapshot이며 실시간 dashboard나 프로젝트 간 자동 실행 구현은 아닙니다.
+
 ```sh
 python3 scripts/check-contracts.py examples/pilot.json
 python3 -m unittest discover -s tests -v
