@@ -23,3 +23,16 @@ Paperclip API에는 process Contract Probe와 paused codex_local Design Readines
 
 검증: Orca browser에서 실제 렌더·snapshot 확인, 모델표·역할별 산출물·인계 화살표와
 현재 설정/제안의 구분을 PC screenshot으로 확인했다. 원본 설정/인증은 산출물에 없음.
+
+## PM 중심 통합 · 2026-09-10
+
+사용자 지시로 PM이 프레임워크를 적용해 역할을 배분하는 책임을 명시했다.
+별도 총괄 직군을 추가하지 않고 coordinator를 PM의 조율 책임으로 통합한다.
+references/pm-flow.md가 이 모델의 배정·인계 계약을 소유하며 SKILL/roles/handoff에서 연결한다.
+PM은 정본·프로젝트 문서·도구 준비 상태·기존 권한을 읽고 역할/실제 executor/model을
+작업별로 선택한다. QA는 최초 기준부터 참여, 디자인 의존 개발은 검증된 원본 인계 후 시작.
+모델명 배정은 아직 제안이고 자동 scheduler/실제 역할 팀을 생성하지 않았다.
+시각화에는 PM 책임, 모델 배정, 단계별 참여자/산출물/시작 조건을 함께 반영했다.
+
+검증: skill validator 통과, v1 샘플 5개 계약 검사 통과. 동일 회사 skill을 갱신했고
+Orca 실제 화면에서 PM 배정 구조와 단계별 업무 표의 렌더를 확인했다.

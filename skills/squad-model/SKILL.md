@@ -6,6 +6,8 @@ description: Coordinate this repository's squad work through PM, planning, desig
 # Squad model
 
 Read [the task contract](references/model.md) before decomposing or advancing work.
+The PM owns coordination and role allocation using [the integrated PM flow](references/pm-flow.md).
+Read it when accepting intake, assigning executors/models, or advancing a handoff.
 Use [role contracts](references/roles.md) for assignment and completion, and
 [the handoff template](references/handoff.md) in the existing named task document.
 For design or FE handoff, also read [design tools](references/design-tools.md).
