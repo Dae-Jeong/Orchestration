@@ -34,6 +34,33 @@ PM의 역할 책임과 task별 실행 모델을 분리하는 방향은 유지하
 
 ## 배정 운영안
 
+### Gearbox 0.2.3 소스·hook 검토
+
+검토 고정점: [4105087](https://github.com/Adityaraj0421/gearbox/tree/4105087bfe576837295c9075a09fe1c92e385f57), MIT.
+설치나 실제 모델 호출 없이 Python 표준 라이브러리 hook을 임시 디렉터리에서 합성 이벤트로 시험했다.
+
+| 확인 항목 | 결과·우리 적용 판단 |
+| --- | --- |
+| 모델 선택 | SessionStart가 routing.md를 문맥에 주입하고 coordinator가 명시적 model/subagent_type을 전달한다. 학습 selector는 현 구현이 아니다. |
+| 자동 강제 | PreToolUse는 escalation marker를 기록하며 부적절한 모델 배정을 차단하지 않는다. generic proxy를 넣어도 종료 코드 0, fallback=true 기록을 재현했다. |
+| 검증 귀속 | A, B를 순서대로 배정한 뒤 A 검증을 보내도 최신 미검증 B에 귀속됐다. task ID 대신 같은 session의 최근 T1/T2를 찾는 휴리스틱이다. 병렬 성과 측정에 그대로 사용 불가. |
+| verifier 식별 | 이름에 verifier가 포함된 다른 agent도 기록된다. custom-verifier 이벤트가 verdict를 생성하는 것을 재현했다. 정확한 gearbox namespace 강제와 다르다. |
+| 상향 기록 | 정해진 escalation marker가 있을 때 기록되는 것을 확인했다. marker 누락은 자동 추론하지 않는다. |
+| 기존 dirty 변경 | BASELINE은 git status 목록을 coordinator가 전달하는 관행이다. 이미 dirty인 같은 파일의 추가 변경을 정확히 분리하는 snapshot은 아니다. |
+| 권한·도구 | verifier의 read-only는 지침이며 Bash를 사용할 수 있다. .pen·UIBowl 등 직무 도구 연결과 우리 권한 계약을 대신하지 않는다. |
+| telemetry | prompt 앞 200자, cwd, session, usage를 로컬 JSONL에 기록한다. 우리 repo에는 로그를 올리지 않는다. |
+| effort | ultrathink 문구의 전파는 upstream도 실험 상태로 표시한다. Codex reasoning effort 연결 검증은 없다. |
+
+Code: [routing policy](https://github.com/Adityaraj0421/gearbox/blob/4105087bfe576837295c9075a09fe1c92e385f57/routing/routing.md),
+[hooks](https://github.com/Adityaraj0421/gearbox/blob/4105087bfe576837295c9075a09fe1c92e385f57/hooks/hooks.json),
+[verdict correlation](https://github.com/Adityaraj0421/gearbox/blob/4105087bfe576837295c9075a09fe1c92e385f57/hooks/scripts/log-verdict.py).
+
+판단: Claude Code 안에서 쓰는 난이도별 위임 플러그인으로는 유용한 후보다.
+현재 Orca/Codex에 직접 설치되는 플러그인은 아니다. 검증·성과 귀속은 기존 task/dispatch ID와
+criteria revision/hash를 정본으로 유지해야 한다. Claude Code 단일 제한 작업의 설치 검증 또는
+선택 규칙의 Orca adapter 적용이 다음 후보이며, 이번 검토에서 어느 쪽도 구현·기동하지 않았다.
+새 scheduler는 필요하지 않다. 학습 router·비용 절감·실제 모델 선택 품질은 미검증이다.
+
 ```mermaid
 flowchart LR
   T[역할과 작업 계약] --> F[도구·권한·문맥 요구로 후보 제한]
