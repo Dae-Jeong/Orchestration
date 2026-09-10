@@ -19,4 +19,8 @@ result = {'probe': 'squad-model', 'contracts_valid': count,
           'reference_sha256': hashlib.sha256(reference.read_bytes()).hexdigest(),
           'canonical_workflow_read': workflow_read,
           'model_calls': 0, 'limitations': 'File access and validation only; no LLM comprehension claim'}
+result['reference_files_sha256'] = {
+    p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+    for p in sorted((skill.parent / 'references').glob('*.md'))
+}
 print(json.dumps(result))

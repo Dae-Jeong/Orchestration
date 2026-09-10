@@ -1,16 +1,21 @@
 ---
 name: squad-model
-description: Coordinate an authorized work item through PM/planning, design and development using explicit task contracts and Paperclip issues. Use for this repository's squad pilot and task decomposition.
+description: Coordinate this repository's squad work through PM, planning, design, development and QA with task contracts, handoffs and Paperclip issues.
 ---
 
 # Squad model
 
 Read [the task contract](references/model.md) before decomposing or advancing work.
+Use [role contracts](references/roles.md) for assignment and completion, and
+[the handoff template](references/handoff.md) in the existing named task document.
+For design or FE handoff, also read [design tools](references/design-tools.md).
 Read the operator-provided canonical Product Workflow through
 `PRODUCT_WORKFLOW_FILE` when available. This bundle owns only this project's
 task model; it does not replace global collaboration rules. If that external
 document is unavailable, disclose it and use the explicit task contract; do not
 claim the canonical process was read.
+Use the operator's `product-workflow` skill for evidence intake and outcome review;
+check its availability in the executor, rather than assuming this session's catalog.
 
 1. Capture the intake evidence, intended user outcome and exclusions. PM/planning
    proposes the smallest task breakdown; design and development identify their
@@ -34,5 +39,5 @@ claim the canonical process was read.
    After restart, inspect Paperclip run/issue history and external effects before
    replay. Changed criteria require review of affected evidence and successors.
 
-For the installation pilot, use the deterministic process probe only. Paid
-models, deployment, messages and recurring runs need their own execution scope.
+The installation pilot uses deterministic probes and bounded read-only tool checks.
+Paid models, deployment, messages and recurring runs need their own execution scope.

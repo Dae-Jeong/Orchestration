@@ -17,6 +17,13 @@ LLM 역할 팀의 실제 제품 수행과 지속 병렬 실행은 아직 검증�
 - [설치·환경·증거](tasks/paperclip-pilot.md), [모델 작업](tasks/personal-model.md)
 - [재사용 skill](skills/squad-model/SKILL.md), [모델 계약](skills/squad-model/references/model.md),
   [샘플 계약](examples/pilot.json)
+- [PM·기획·디자인·개발·QA 역할 계약](skills/squad-model/references/roles.md),
+  [완료·인계 양식](skills/squad-model/references/handoff.md),
+  [UIBowl → Pencil 도구 계약](skills/squad-model/references/design-tools.md)
+
+역할 지침과 회사 skill 갱신을 완료했습니다. Design Readiness Codex agent는 paused입니다.
+명시적 전용 CODEX_HOME에 두 MCP와 필요한 skill을 구성했고 모델 없는 연결 검사에서
+Pencil은 성공, UIBowl은 HTTP 401로 인증 미완료입니다. 기본 managed seed 검증과 구분합니다.
 
 ## 새 clone에서 설치
 
@@ -65,6 +72,21 @@ seed는 local pilot API에 미할당 backlog와 구조화된 blocker를 등록�
 `./scripts/paperclip skills import "$PWD/skills/squad-model" --company-id <id> --api-base http://127.0.0.1:13100`
 로 가져옵니다. 서버가 다른 머신이면 서버에서 접근 가능한 경로가 필요합니다.
 process adapter는 managed skill sync가 미지원이므로 probe는 파일을 명시적으로 읽습니다.
+Codex adapter도 sync 응답의 configured는 다음 실행 시 연결 예정이라는 뜻입니다.
+무료 구성 확인은 다음과 같이 실행하며 agent/model/MCP를 기동하지 않습니다.
+
+```sh
+python3 scripts/probe-design-readiness.py --agent-id <design-agent-uuid> \
+  --instance-root .paperclip/instances/default
+```
+
+실제 디자인 실행에는 운영자 소유의 Pencil 앱/CLI, 인증된 UIBowl MCP,
+product-workflow skill과 정본 연결이 필요합니다. 인증 URL/config는 복제해 배포하지 않습니다.
+현재 기본 managed home seed가 호스트 config 전체를 복사하므로 이 agent는 공식 지원
+env.CODEX_HOME override로 .runtime/design-codex-home을 사용합니다. 두 MCP 설정만
+로컬 권한 600 파일에 구성하고 skill은 원본으로 연결했습니다. Codex 인증은 복제하지
+않았으며 유료 실행은 하지 않았습니다. UIBowl 인증과 실행 범위가 준비되기 전 paused를
+유지합니다. 자세한 검증 경계는 모델 작업 문서에 있습니다.
 
 ## 외부 문서와 로컬 데이터
 

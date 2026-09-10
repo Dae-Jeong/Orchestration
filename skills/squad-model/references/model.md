@@ -2,6 +2,10 @@
 
 Status: repository pilot convention, not an organization-wide policy.
 
+Detailed [role contracts](roles.md) and the [handoff record](handoff.md) supplement
+this v1 format without changing its identifiers, hash algorithm or five fixtures.
+See [design tools](design-tools.md) for the verified tool chain and its limits.
+
 | Role | Input | Output and verification |
 | --- | --- | --- |
 | PM/planning | Intake evidence, user outcome, constraints | Scope, behavior contract, decomposition, criteria and authorization references |
