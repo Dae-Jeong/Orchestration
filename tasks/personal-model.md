@@ -54,3 +54,12 @@ blocker/approval은 유지했다. 새로운 회사나 중복 workspace, 유료 a
 소속 이슈 5개 확인. Orca 설정 탭 URL:
 http://127.0.0.1:13100/ORC/projects/personal-orchestration-model/configuration
 일반 workspace 연결은 Codebase에 표시되며, 실험적 작업별 격리 workspace는 계속 비활성이다.
+
+### 설정 화면 오류 복구
+
+후속 사용자 제보로 실제 화면의 Internal server error를 확인했다. 프로젝트 이름에 의도하지
+않은 입력이 섞여 urlKey가 바뀌었고, 기존 이름 URL 조회가 실패했다. 이 버전은 찾지 못한
+shortname을 UUID 쿼리에 전달해 HTTP 500을 반환한다. 앞선 UUID API 확인만으로는 이 오류를
+발견하지 못했다. 이름을 Personal Orchestration Model로 복원한 뒤 기존 shortname API 200,
+Orca 새로고침 후 Configuration/Codebase 렌더링 및 오류 문구 없음까지 확인했다.
+설정·workspace·작업은 보존했고 upstream 소스나 DB schema를 수정하지 않았다.
