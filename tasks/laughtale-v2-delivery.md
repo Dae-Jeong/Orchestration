@@ -1,6 +1,6 @@
 # Laughtale V2 실제 실행
 
-Status: 실행 중 · 2026-09-10
+Status: 제한된 PRODUCT revision 2 실행·독립 검증 완료 · 2026-09-10
 
 ## 목표
 
@@ -55,6 +55,8 @@ PATH의 경로 준비 부분은 PRODUCT 실행에 포함해 확인하며 전체 
 
 최종 브라우저 결과·독립 QA 판정·종료 처리는 아직 대기 중이다.
 
+위 문장은 중간 체크포인트다. 최종 결과는 아래 최종 수용 기록으로 대체한다.
+
 ## 사용하지 않는 agent 정리 · 2026-09-10
 
 사용자가 완료·미사용 agent 종료를 요청했다. Orca의 정확한 Laughtale workspace에서
@@ -66,3 +68,27 @@ PATH의 경로 준비 부분은 PRODUCT 실행에 포함해 확인하며 전체 
 개발 최신 보고: 브라우저 split routing/reconnect/중복 렌더 검사와 revoke 1780.7ms,
 별도 revoke 2510ms·자연 만료 상한 1963.99ms 및 이전 cookie HTTP401/WS403 통과.
 마지막 sender lease guard 수정 후 최종 image·증거를 인계할 예정이며, 아직 독립 QA 통과로 보지 않는다.
+
+## 최종 수용 · 2026-09-10
+
+- 개발: HTTP/WS 경로 분리, 재접속·인증 종료 처리, Primary query 시작 시점 lease와 stale send 차단을
+  구현했다. 최종 Gateway image는 product-20260910-b. FE49·BE354 통과 보고와
+  Redis 1개 skip·PostgreSQL 93개 deselect를 구분한다.
+- 독립 QA: FE49·집중 BE43, 양쪽 typecheck·계약 검사를 직접 통과했다.
+  소스20개·산출물20개 hash를 대조했고 PM도 40개 일치를 재확인했다.
+- P2 최초 증거는 POST가 socket close보다 먼저여서 불충분했다. QA가 실제 CLOSED 확인 후
+  seq4228을 저장하고 history에서 정확히 한 행 복구했다. 최종 rows/head4228, alerts0.
+  QA fetch wrapper 오류와 한 번의 수정 재시도도 보고서에 보존했다.
+- P1·P2 통과, P3는 관측한 시료에 한해 통과: revoke1072.037ms,
+  자연 만료 상한1965.049ms, 1008과 이전 cookie HTTP401/WS403.
+- P4: PM이 독립 QA 결과·원래 P2 증거의 한계·새 증거·남은 unknown을 ORC-17에 반영하고
+  이번 제한된 PRODUCT revision2를 done 처리했다. V2 전체나 부하/용량 수용은 아니다.
+- 독립 보고서: Laughtale `.artifacts/v2-product-independent-review.md`,
+  SHA256 `caeba30c533cef1cea8a1981a11125cfec7287ceed40cfaf3a68373bfe0a02c5`.
+  원본 runtime 증거는 제품 repo의 ignored artifacts에 보존하며 이 repo에 복제하지 않는다.
+- 개발·QA dispatch 모두 succeeded 후 worker-release 완료, transcript captured.
+  reclaimable worker 0개 확인. FE18083/API18082/Gateway18085 및 필요한 서버는 유지한다.
+
+남은 미검증: 지연·stall 하에서 엄격한5초 보장, 자연 만료의 브라우저 렌더, 두 브라우저 격리,
+이번 실행에서 제외한 PostgreSQL/Redis 통합 검사, 자동 LB 및 부하·규모·용량 후속 작업.
+후속 후보는 별도 task로 유지하며 이번 결과로 통과 처리하거나 부하를 자동 기동하지 않는다.
