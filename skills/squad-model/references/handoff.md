@@ -10,6 +10,7 @@ authority/resources/decision에 핵심 조건과 버전이 고정된 근거를 �
 
 - task_id / Paperclip issue 연결 / 역할·실제 담당자:
 - PM 배정: executor / model·설정 / 배정 이유 / 필요한 skill·도구의 실제 준비 상태:
+- Orca 실행 시: Run / Task / active Dispatch / 정확한 workspace / 실행 소유 도구:
 - 원문 근거와 범위 / 관찰 / 해석·대안 / 가설·반증 질문:
 - 성공·실패·무효·한계 / 요약 선택 기준:
 - 문제·대상 / 성과 질문 / 범위·비범위:

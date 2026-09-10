@@ -36,3 +36,18 @@ PM은 정본·프로젝트 문서·도구 준비 상태·기존 권한을 읽고
 
 검증: skill validator 통과, v1 샘플 5개 계약 검사 통과. 동일 회사 skill을 갱신했고
 Orca 실제 화면에서 PM 배정 구조와 단계별 업무 표의 렌더를 확인했다.
+
+## PM → Paperclip + Orca 실행 흐름 · 2026-09-10
+
+사용자와 합의한 위임: PM agent가 프레임워크 안에서 역할 배정·착수·수정·검증·후속
+진행을 직접 조율하고 기존 권한을 반복 승인받지 않는다. 위임 밖의 기준/방향·권한/비용
+변경이나 한도 소진은 사용자에게 돌린다. 상시 PM 기동 승인은 아니다.
+
+버전별 Orca orchestration, coordinator-loop, placement-and-remote guide를 근거로
+Paperclip=업무 상태, Orca=실행 Task/Dispatch, PM=판단·두 도구 호출로 책임을 나눴다.
+pm-flow 참조에 ID 연결, 중복 실행 방지, worker_done과 검증 완료 구분, 중단/재개를 추가했다.
+시각화와 업무 표도 동일 흐름으로 갱신했다. 실제 run/worker를 만들거나 자동 동기화를
+구현하지 않았다. 다음 통합 시범에서 실제 lifecycle과 기록 반영을 검증해야 한다.
+
+검증: skill validator와 기존 5개 계약 검사 통과, Orca PC 렌더 확인.
+Orca 노드의 보조 라벨 여백을 조정했고 기존 제품 작업·runtime 설정은 변경하지 않았다.
