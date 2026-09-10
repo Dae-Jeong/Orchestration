@@ -1,6 +1,6 @@
 # 작업 난이도에 따른 모델 선택
 
-Status: 조사 완료 · PM 배정 운영안 · 자동 router 미설치
+Status: 후보 조사 · agent용 플러그인 추가 확인 · 자동 router 미설치
 Checked: 2026-09-10
 
 ## 목표와 범위
@@ -17,7 +17,19 @@ Checked: 2026-09-10
 | [LLMRouter](https://github.com/ulab-uiuc/LLMRouter) | KNN 등 여러 router의 학습·평가·추론, multi-round/agentic 선택, 자체 데이터와 평가 지표 지원 | 우리 작업 기록으로 선택기를 비교할 때 후보. 학습 데이터·모델별 결과가 필요하며 Orca dispatch 연결은 별도 검증 대상이다. |
 | [vLLM Semantic Router](https://github.com/vllm-project/semantic-router) | 요청 신호와 정책에 따른 다중 모델 경로, Apache-2.0 | API gateway를 운영할 때 후보. [SAAR](https://vllm-project.github.io/2026/06/02/session-aware-agentic-routing.html)는 도구 호출과 provider 상태의 연속성을 고려해 전환을 제한한다. 현재 Codex 세션을 자동 전환하는 연결은 미검증이다. |
 
-Inference: 현재는 PM이 기존 실행 도구의 모델 선택 기능을 사용하는 것이 가장 작은 적용이다.
+## Agent 실행을 직접 배정하는 후보 · 조사 교정
+
+앞 조사에서 API router에 치우쳐 PM의 수동 선택을 먼저 권한 것은 성급했다.
+다음 프로젝트는 agent 위임 자체에 선택·상향·검증을 연결하므로 우선 비교 대상이다.
+
+| 후보 | 공식 저장소에서 확인 | 적용 경계 |
+| --- | --- | --- |
+| [Gearbox](https://github.com/Adityaraj0421/gearbox) | Claude Code 플러그인. 작업별 Haiku/Sonnet/Opus 하위 agent 배정, 실패 시 상향, 독립 verifier, 위임 결과 기록 | 주 세션 모델은 변경하지 않는다. hook과 주입된 정책을 사용하며 실제 정책 준수 확인이 필요하다. Codex 어댑터는 확인하지 못했다. |
+| [opencode-model-router](https://github.com/marco-jardim/opencode-model-router) | OpenCode 플러그인. 작업 분류에 따른 fast/medium/heavy 위임, 복합 작업 분리, provider fallback, 완료 계약과 검증 | 검증 enforcement 기본값은 advisory이며 enforced와 다르다. Orca/Codex 직접 연결은 미검증이다. |
+
+Inference: API gateway 설치보다 위 agent용 플러그인의 선택·위임 경로를 먼저 비교한다.
+PM의 역할 책임과 task별 실행 모델을 분리하는 방향은 유지하되, 수동 선택만 가능하다고 보지 않는다.
+설치·실행 검증 전에는 저장소가 설명하는 기능과 우리 runtime에서 확인한 기능을 구분한다.
 공개 benchmark의 절감률이나 모델 순위를 우리 제품 작업의 품질·비용으로 일반화하지 않는다.
 
 ## 배정 운영안
