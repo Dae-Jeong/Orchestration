@@ -58,6 +58,12 @@ telemetry는 DO_NOT_TRACK=1로 끕니다. 비밀은 chmod 600으로 보호하고
 
 ## 모델 사용과 검증
 
+[PM 업무 계약](skills/squad-model/references/pm-flow.md)은 도구와 분리하고,
+[Paperclip·Orca 연결](skills/squad-model/references/execution-tools.md)은 별도 지침으로 둡니다.
+[인계 양식](skills/squad-model/references/handoff.md)은 다른 실행 수단에서도 읽을 수 있는
+업무·결과·남은 일 snapshot입니다. 자동 이전 기능은 아닙니다.
+[주기 점검 루프](skills/squad-model/references/review-loop.md)는 설계 후보이며 아직 활성화하지 않았습니다.
+
 [모델 → 역할 → 업무 인계 시각화](tasks/model-process.html)에서 실제 모델 설정과
 역할별 배정안을 구분해 볼 수 있습니다. 상시 팀이나 자동 모델 배정은 아직 미구현입니다.
 
