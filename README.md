@@ -1,127 +1,71 @@
-# Obsidian + Orchestration
+# Orchestration
 
-여러 제품의 업무를 PM 중심으로 조율하는 개인 오케스트레이션 모델.
-**PM이 배정하고, Paperclip에 기록하고, Orca에서 실행합니다.**
+AI 세션으로 제품 작업을 진행하고, 그 맥락을 Obsidian에 모아 이어가는 운영 구조다. **Task 하나 + 담당 세션 하나**를 기본으로, 목표·완료 조건·현재 결과·다음 행동을 같은 Task에 남긴다.
 
-Obsidian의 로컬 LLM Wiki에서 프로젝트 맥락과 이전 결과를 읽고, 검증된 작업 결과를 다시
-위키에 연결합니다. 이 repo는 실행 모델과 도구를 소유하며 위키 진입점은 Git-ignored
-`AGENTS.local.md`에 둡니다. [지식·실행 연결](docs/obsidian-orchestration.md)을 참고하세요.
+담당 세션이 조율과 실행을 함께 맡는다. 독립적으로 나눌 이득이 있을 때만 추가 세션을 활용하고, 최종 결과는 담당 세션이 확인한다.
 
-## 업무 흐름
+## 동작 흐름
 
-![통합 업무 흐름](docs/images/model-process.png)
+[![Task 중심 실행: 인수 → 실행 → 검증 → 기록](docs/images/task-session-flow.png)](docs/images/task-session-flow.png)
 
-[이미지 확대](docs/images/model-process.png) · [상세 흐름도](tasks/model-process.html)
+[SVG 원본](docs/images/task-session-flow.svg)
 
-**제품 맥락·도구 → PM → 기획·디자인·개발·마케팅 → QA → HR 리뷰·제품 성과 → PM**
+1. **인수** — 기존 Task와 실제 파일, 현재 담당을 확인한다. 새 업무라면 요청을 받은 세션이 목표·범위·완료 조건을 작성한다.
+2. **실행** — 제품 repo에서 작업한다. 분담이 필요하면 작업 범위와 담당을 정하고 산출물·검증 근거를 돌려받는다.
+3. **검증** — 처음 정한 완료 조건으로 결과를 확인한다. 목표나 변경 영향에 맞는 성능 지표도 필요한 경우 함께 측정한다.
+4. **기록** — 같은 Task에 현재 결과·증거·다음 행동을 갱신한다. 다음 세션은 이 기록과 실제 파일을 대조해 남은 일을 이어간다.
 
-## 역할과 모델
+## 완료 조건과 성능 측정
 
-| 역할 | 업무 → 인계 | 모델 후보 |
+완료 조건은 **그 Task가 달성하려는 결과**다. BE·FE 지표를 모든 작업의 공통 통과 기준으로 적용하지 않는다.
+
+| 작업 예시 | 완료를 확인할 근거 | 함께 살펴볼 측정 |
 | --- | --- | --- |
-| 사용자 | 방향·목표·허용 범위 → PM | — |
-| PM | 문제·우선순위·계약·배정 → 역할별 작업·후속 판단 | Astra |
-| 기획 | 시나리오·규칙·예외 → 디자인 플로우·개발 규칙·QA 기준 | Astra / Sol |
-| 디자인 | 컨셉·레퍼런스·시안·토큰 → 원본·상태·매핑·렌더 증거 | Astra / Sol |
-| 개발 | 코드 재사용·구현·테스트 → 리뷰 가능한 변경·재현 증거 | Terra / Sol |
-| QA | 초기 기준 설계·독립 검증 → 기준별 판정·수정 요청 | 미정 |
-| 마케팅 | 고객·메시지·채널 실험 → 제작 요청·성과·학습 | 미정 |
-| HR / agent 운영 | 온보딩·준비 확인·공동 리뷰 → 개선안·효과 추적 | 미정 |
+| DB 쿼리 성능 개선 | 결과·권한 유지, 같은 조건에서 전후 성능 개선 확인 | 쿼리 시간·실행 계획·쿼리 수 |
+| 화면 로딩 개선 | 목표 화면의 로딩 개선과 기능 유지 | LCP·요청 수·번들 크기 중 관련 항목 |
+| 문구·단순 UI 수정 | 요청한 표현·동작·레이아웃 확인 | 성능 영향이 없으면 생략 |
 
-모델은 배정 후보이며 직군에 고정하지 않습니다. PM이 작업 난이도·필요 도구·실패 영향에 따라
-선택합니다. [동적 모델 선택 조사·운영안](tasks/model-routing.md)은 정리됐고 자동 router는 미설치입니다.
-필요한 역할만 실행하며, 자가 검증은 별도로 표시합니다.
+성능 개선 자체가 목표이면 측정이 목표 달성의 근거가 된다. 그 외 추가 측정은 영향과 후속 개선을 판단하는 자료로 기록한다. [측정 선택·해석 기준](docs/engineering-measurement.md)
 
-## 업무 프로세스
+## 구성
 
-1. **소재:** 원문 근거 수집, 관찰·해석·가설 구분.
-2. **조율:** PM이 문제·사용자·성과 지표·우선순위·범위 정리.
-3. **계약:** 완료 조건·검증법·reviewer·허용 효과·한도 합의.
-4. **배정:** 선행 검증 완료 + 공유 자원 충돌 없음이면 병렬 착수.
-5. **실행:** 역할별 상세 작업 → 산출물·질문·남은 일 인계.
-6. **검증:** pass → 완료, fail → 담당 수정, unknown → 대기·판단.
-7. **학습:** 후속 작업 해제 → 실제 성과 확인 → 다음 소재.
-8. **개선:** HR이 역할·QA의 근거를 공동 리뷰 → PM 개선 배정 → QA 재검증.
-
-**계약 원칙:** 안정적인 `task_id` / 기준 `revision·hash` / `depends_on` 분리.
-기준 변경 시 증거 재검토, 기존 권한의 반복 승인 금지, delivery와 outcome 구분.
-
-## 여러 제품과 실행 도구
-
-**공통 PM 조율 → 제품별 프로젝트·repo·workspace → 필요한 역할 실행.**
-
-| 구분 | 책임 |
+| 구성 | 역할 |
 | --- | --- |
-| PM + 프레임워크 | 제품 간 우선순위·공유 자원·역할·완료 기준 조율 |
-| Paperclip | 업무 단위의 담당·상태·blocker·review·증거 |
-| Orca | 제품별 worker 배치·실행 시도·질문과 결과 전달 |
-| 제품 repo | 상세 체크리스트·설계·코드·검증 산출물 |
+| Obsidian Task | 업무 상태의 정본. 목표·담당·완료 조건·현재 결과·다음 행동 |
+| 제품 repo · Agent | 코드·설계·검증 산출물이 있는 실제 작업 공간과 실행자 |
+| Harness · Log | 관측된 변경을 세션·Task·증거에 연결하고 변경 이력을 보존 |
+| Orca · 선택 | 추가 세션 실행과 결과 전달. 업무 상태는 중앙 Task에 연결 |
 
-업무 계약은 도구와 분리합니다. 자체 scheduler는 없으며, 제품 간 자동 실행은 미검증입니다.
+현재 상태는 Task, 산출물은 제품 repo, 변경 이력은 Log에 둔다. 별도 보드나 진행 문서에 같은 상태를 중복 관리하지 않는다.
 
-Laughtale·Dae-Jeong의 프로젝트 진입점과 로컬 업무판을 연결했습니다.
-[프로젝트 연결·사용법](docs/project-onboarding.md)을 참고하세요.
+## 시작하기
 
-## 주기 점검 루프
+대상 repo에서 세션을 열고 `AGENTS.md`와 기존 Task·담당을 확인한 뒤 목표를 전달한다.
 
-**성과 개선:** 역할·QA 증거 → HR이 PM·직무와 리뷰 → PM 개선 배정 → QA 재검증.
-제품 성과·산출물 품질·실행 효율을 분리하며, HR의 개선 효과는 PM·사용자가 검토합니다.
-[역할별 지표·리뷰 기준](docs/role-performance.md)은 운영안이며 목표치·리뷰 주기는 미정입니다.
+> 목록 쿼리를 개선해줘. 결과·권한은 유지하고 전후 시간을 비교해줘.
 
-**이벤트·주기 점검 → 변경 확인 → PM 판단 → 실행/대기 → 검증·기록.**
+세션을 바꿀 때는 같은 Task를 지정해 이어가도록 요청한다. 새 세션은 이전 작업자의 종료·인수 가능 상태와 남은 변경을 확인한다. Task 갱신만으로 새 세션이 자동 실행되지는 않는다.
 
-새 일 없으면 종료, 활성 작업은 중복 실행 금지. 주기·비용·시간·재시도 한도는 **미정·미활성**입니다.
-
-## 현재 상태
-
-이 repo의 문서 작업으로 **PM 편집 → 독립 Codex QA → HR 리뷰**를 한 번 실행했습니다.
-계약·테스트 검사 통과, 표현 3곳 수정, 운영 개선안 2개를 기록했습니다. [시범 결과](tasks/first-live-pilot.md)
-
-| 구분 | 상태 |
-| --- | --- |
-| Paperclip 로컬 설치·UI·재시작 상태 보존 | 검증 완료 |
-| 역할 지침·완료 기준·인계 계약 | 구성 완료 |
-| 제안 계약 5개·무료 process probe | 검사 완료 |
-| Paperclip 기록 + Orca 단발 QA·HR 실행 | 검증 완료 · PM이 상태 연결 |
-| 디자인 도구 | Pencil 연결 확인 / UIBowl 인증 미완료 |
-| 실제 다중 agent 제품 수행·자동 배정 | 미검증 |
-| 상시 실행·주기 루프 | 미활성 |
-
-## 설치·실행
-
-**요구 환경:** Git·fnm·Python 3·기존 PostgreSQL·운영자 공통 workflow 문서.
-검증 환경: macOS arm64 / Node 24.21.0 / PostgreSQL 16.15.
+중앙 wiki·harness는 외부 환경이다. clone에 포함되지 않으며 [설정 안내 · 로컬 의존성](docs/external-dependencies.md#local-1)를 따른다. 중앙 vault에서 프로젝트를 조회할 수 있다.
 
 ```sh
-./scripts/install-paperclip
-# 전용 DB·환경 설정: 아래 설치 가이드 참조
-./scripts/paperclip run --no-repair
+uv run python -m harness context /absolute/product/repo
 ```
 
-접속: <http://127.0.0.1:13100/ORC/issues> · 중지: 서버 터미널에서 `Ctrl-C`
+## 검증 범위
 
-[설치 가이드](docs/local-setup.md)에서 전용 DB·환경 설정을 먼저 완료하세요. clone만으로 실행 환경이 완성되지는 않습니다.
+별도 세션이 같은 Task를 읽고 작업을 인수해 수정·검증·기록하는 흐름을 실제로 확인했다. 중단·기록 재시도·동시 변경 판정은 격리된 회귀 시험으로 확인했다.
 
-## 검증
+자동 배정·자동 재개와 동시 쓰기 잠금은 제공하지 않는다. 세션 종료나 문서 검사 통과만으로 제품 작업의 완료를 판단하지 않는다. [검증 결과와 한계 · 로컬 의존성](docs/external-dependencies.md#local-2)
 
-```sh
-python3 scripts/check-contracts.py examples/pilot.json
-python3 -m unittest discover -s tests -v
-```
+## 저장소 구성
 
-계약 검사는 실제 agent 수행·제품 성과 검증과 별개입니다.
+- `docs/` — 현재 운영 모델, 측정 기준, 가상 사례와 외부 방식 비교
+- `docs/images/task-session-flow.*` — README 구성도와 편집 가능한 SVG 원본
+- `skills/squad-model/`, `scripts/`, `examples/`, `tests/` — 이전 역할·계약 중심 실험과 검증 도구
 
-## 문서·데이터
+Paperclip 관련 스크립트와 npm 의존성은 이전 실험용으로 보존한다. 현재 Task·세션 모델을 읽고 적용하는 데 Paperclip 설치는 필요하지 않다. 중앙 wiki·harness 연결은 [외부 환경 안내](docs/external-dependencies.md)를 참고한다.
 
-`tasks/`는 Git에 올리지 않는 로컬 작업 기록입니다. 아래와 본문의 `tasks/` 링크는
-이 머신에 기록이 있을 때만 열립니다. 공유할 운영 기준·검증된 사실은 `docs/`가 소유합니다.
+## 상세 문서
 
-| 문서 | 내용 |
-| --- | --- |
-| [운영 모델](docs/operating-model.md) | 역할·업무 순서·도구 책임 상세 |
-| [Squad Model skill](skills/squad-model/SKILL.md) | 재사용 가능한 역할·작업·인계 계약 |
-| [설치·검증](docs/local-setup.md) | DB·환경·도구 연결·알려진 한계 |
-| [샘플 계약](examples/pilot.json) | v1 제안 작업 5개 |
-| [작업 기록](tasks/personal-model.md) | 결정·검증 근거 |
-
-공통 행동 규칙은 운영자의 global wiki가 소유합니다. 비밀·인증·runtime·로그·`.ideas/`는 Git에서 제외합니다.
+[운영 모델](docs/task-session-model.md) · [BE·FE 측정 기준](docs/engineering-measurement.md) · [가상 사례](docs/engineering-measurement-simulation.md) · [기록·복구 · 로컬 의존성](docs/external-dependencies.md#local-3) · [외부 방식 비교](docs/orchestration-patterns.md)

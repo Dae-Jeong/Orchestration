@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1010" viewBox="0 0 1440 1010" role="img" aria-labelledby="title desc"><title id="title">Task 중심 오케스트레이션의 실행과 인계</title><desc id="desc">사용자 요청을 담당 세션이 인수하고 제품 repo에서 실행, 검증한 뒤 Task와 Log에 기록한다. 필요할 때 추가 세션으로 분담하며 다음 세션은 같은 Task와 실제 파일을 확인해 재개한다.</desc><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#78979e" stroke-width="1.5"/></marker></defs><style>text{font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif;fill:#23434d}.title{font-size:32px;font-weight:700}.head{font-size:24px;font-weight:700}.body{font-size:20px;fill:#58747d}.small{font-size:18px;fill:#58747d}</style><rect width="1440" height="1010" fill="white"/>
+<text x="48" y="53" class="title" text-anchor="start">Task 하나를 중심으로, 세션이 바뀌어도 이어지는 작업</text>
+<text x="48" y="87" class="body" text-anchor="start">기본은 담당 세션 하나 · 분담은 필요할 때 · 현재 상태는 같은 Task에 기록</text>
+<rect x="48" y="120" width="320" height="145" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="72" y="159" class="head" text-anchor="start">사용자</text>
+<text x="72" y="196" class="body" text-anchor="start">목표 · 우선순위 · 허용 범위</text>
+<text x="72" y="225" class="body" text-anchor="start">요청 또는 작업 재개</text>
+<rect x="416" y="120" width="580" height="145" rx="14" fill="#edf7f3" stroke="#8cb8ad" stroke-width="1.7"/>
+<text x="440" y="159" class="head" text-anchor="start">Obsidian Task · 업무 상태의 정본</text>
+<text x="440" y="196" class="body" text-anchor="start">목표 · 범위 · 담당 · 완료 조건</text>
+<text x="440" y="225" class="body" text-anchor="start">현재 결과 · 증거 링크 · 다음 행동</text>
+<rect x="1044" y="120" width="348" height="145" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="1068" y="159" class="head" text-anchor="start">Log · 변경 이력</text>
+<text x="1068" y="196" class="body" text-anchor="start">변경 과정 · 이전 원문 보존</text>
+<text x="1068" y="225" class="body" text-anchor="start">실행·검증 근거 연결</text>
+<path d="M208 265 V345" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="222" y="310" class="small" text-anchor="start">요청 전달</text>
+<path d="M706 265 V345" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)" marker-start="url(#a)"/>
+<text x="726" y="310" class="small" text-anchor="start">읽기 · 현재 결과 갱신</text>
+<path d="M1218 345 V265" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="1233" y="310" class="small" text-anchor="start">이력 보존</text>
+<rect x="48" y="345" width="1344" height="225" rx="14" fill="#edf7f3" stroke="#8cb8ad" stroke-width="1.7"/>
+<text x="72" y="384" class="head" text-anchor="start">담당 세션 · 조율과 실행, 최종 결과 확인</text>
+<rect x="72" y="411" width="294" height="134" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="96" y="450" class="head" text-anchor="start">01  인수</text>
+<text x="96" y="487" class="body" text-anchor="start">기존 Task·담당·파일 확인</text>
+<text x="96" y="516" class="body" text-anchor="start">새 목표면 완료 조건 작성</text>
+<rect x="406" y="411" width="294" height="134" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="430" y="450" class="head" text-anchor="start">02  실행</text>
+<text x="430" y="487" class="body" text-anchor="start">제품 repo에서 작업</text>
+<text x="430" y="516" class="body" text-anchor="start">필요한 범위만 분담</text>
+<rect x="740" y="411" width="294" height="134" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="764" y="450" class="head" text-anchor="start">03  검증</text>
+<text x="764" y="487" class="body" text-anchor="start">Task 완료 조건 확인</text>
+<text x="764" y="516" class="body" text-anchor="start">관련 지표는 필요시 측정</text>
+<rect x="1074" y="411" width="294" height="134" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="1098" y="450" class="head" text-anchor="start">04  기록</text>
+<text x="1098" y="487" class="body" text-anchor="start">결과·증거·남은 일 정리</text>
+<text x="1098" y="516" class="body" text-anchor="start">같은 Task 상태 갱신</text>
+<path d="M366 478 H406" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<path d="M700 478 H740" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<path d="M1034 478 H1074" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<path d="M250 570 V640" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)" marker-start="url(#a)" stroke-dasharray="7 5"/>
+<text x="267" y="612" class="small" text-anchor="start">범위 배정 ↔ 결과 반환</text>
+<path d="M720 570 V640" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)" marker-start="url(#a)"/>
+<text x="737" y="612" class="small" text-anchor="start">수정 · 테스트 ↔ 산출물</text>
+<path d="M1190 570 V640" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="1207" y="612" class="small" text-anchor="start">인계 기록</text>
+<rect x="48" y="640" width="404" height="168" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7" stroke-dasharray="7 5"/>
+<text x="72" y="679" class="head" text-anchor="start">추가 세션 · 선택 분담</text>
+<text x="72" y="716" class="body" text-anchor="start">독립 작업과 담당 범위를 정해 실행</text>
+<text x="72" y="745" class="body" text-anchor="start">산출물·검증 근거를 담당에게 반환</text>
+<text x="72" y="774" class="body" text-anchor="start">담당 세션이 통합 후 완료 판단</text>
+<rect x="518" y="640" width="404" height="168" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="542" y="679" class="head" text-anchor="start">제품 repo · 실제 작업 공간</text>
+<text x="542" y="716" class="body" text-anchor="start">코드 · 설계 원본 · 검증 산출물</text>
+<text x="542" y="745" class="body" text-anchor="start">프로젝트 지침과 계약에 맞춰 작업</text>
+<text x="542" y="774" class="body" text-anchor="start">Task는 결과와 근거를 연결</text>
+<rect x="988" y="640" width="404" height="168" rx="14" fill="#edf7f3" stroke="#8cb8ad" stroke-width="1.7"/>
+<text x="1012" y="679" class="head" text-anchor="start">다음 세션 · 같은 Task 재개</text>
+<text x="1012" y="716" class="body" text-anchor="start">이전 담당 종료·인수 가능 상태 확인</text>
+<text x="1012" y="745" class="body" text-anchor="start">Task 기록과 실제 파일을 대조</text>
+<text x="1012" y="774" class="body" text-anchor="start">남은 작업부터 실행·검증</text>
+<rect x="48" y="845" width="858" height="118" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="72" y="884" class="head" text-anchor="start">완료 조건과 추가 측정은 구분</text>
+<text x="72" y="921" class="body" text-anchor="start">쿼리 개선이면 전후 비교가 목표 증거 · 단순 문구 수정이면 성능 측정 생략</text>
+<rect x="938" y="845" width="454" height="118" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="962" y="884" class="head" text-anchor="start">재개는 세션을 시작한 뒤</text>
+<text x="962" y="921" class="body" text-anchor="start">Task 갱신이 자동 실행을 유발하지 않음</text>
+</svg>

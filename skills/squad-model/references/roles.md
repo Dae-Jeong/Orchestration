@@ -100,7 +100,7 @@ v1 JSON의 `pm-planning`은 PM과 기획 관점을 함께 담고, `verification`
 - 실패 귀환: 데이터 누락은 기록 담당, 측정 모호성은 QA·PM, 판정 충돌은 PM/사용자.
 
 두 역할은 문서 계약이며 runtime agent·자동 리뷰를 구성한 것이 아니다. 기존 v1 role enum과
-fixture는 유지한다. [성과 측정·리뷰 운영안](../../../docs/role-performance.md)의 지표는 후보다.
+fixture는 유지한다. [성과 측정·리뷰 운영안](../../../docs/engineering-measurement.md)의 지표는 후보다.
 
 ## 결정 책임
 
