@@ -38,21 +38,69 @@ AI 세션으로 제품 작업을 진행하고, 그 맥락을 Obsidian에 모아 
 
 현재 상태는 Task, 산출물은 제품 repo, 변경 이력은 Log에 둔다. 별도 보드나 진행 문서에 같은 상태를 중복 관리하지 않는다.
 
-## 시작하기
+## 사용법 · Obsidian에서 프로젝트 운용하기
 
-대상 repo에서 세션을 열고 `AGENTS.md`와 기존 Task·담당을 확인한 뒤 목표를 전달한다.
+**Obsidian vault 폴더에서 AI 세션을 열고 담당 프로젝트를 지정한다.** Obsidian은 공통 작업 기록 공간이고, 실제 코드 수정·서버 실행·테스트는 지정한 제품 repo에서 수행한다. 제품 repo에서 직접 세션을 시작해도 같은 Task를 사용할 수 있다.
 
-> 목록 쿼리를 개선해줘. 결과·권한은 유지하고 전후 시간을 비교해줘.
+### 1. 프로젝트 연결 확인
 
-세션을 바꿀 때는 같은 Task를 지정해 이어가도록 요청한다. 새 세션은 이전 작업자의 종료·인수 가능 상태와 남은 변경을 확인한다. Task 갱신만으로 새 세션이 자동 실행되지는 않는다.
+프로젝트 등록부에 **repo 경로와 중앙 문서 위치**가 연결돼 있어야 한다. 프로젝트 index는 목적·우선순위와 지침·실행 안내를 연결하고, Task는 담당·완료 조건·진행 상태를 소유한다. 새 프로젝트는 이 연결부터 설정한다. 별도의 프로젝트 목록이나 진행 보드를 중복 작성하지 않는다.
 
-중앙 wiki·harness는 외부 환경이다. clone에 포함되지 않으며 [설정 안내 · 로컬 의존성](docs/external-dependencies.md#local-1)를 따른다. 중앙 vault에서 프로젝트를 조회할 수 있다.
+중앙 harness가 설치된 vault에서 연결을 확인한다. 이 명령은 조회이며 프로젝트 등록이나 작업 실행을 하지 않는다.
 
 ```sh
 uv run python -m harness context /absolute/product/repo
 ```
 
+### 2. 목표를 주고 시작
+
+> Laughtale 프로젝트를 맡아줘. 등록된 repo와 프로젝트 지침, 기존 Task·담당을 확인해. 목록 쿼리 개선을 진행하고 결과·권한은 유지하면서 전후 시간을 비교해줘.
+
+세션이 대상을 확인하고 기존 Task를 인수하거나 새 Task를 작성한다. 프로젝트가 여러 개로 해석되거나 경로가 없으면 해당 정보부터 확인한다. 코드 변경은 해당 제품 repo에서 시작한 실행 세션에 연결하고, 중앙 기록 명령은 vault에서 실행한다. 현재 harness는 세션의 repo를 고정하므로 Obsidian 세션에서 `cd`만 바꿔 제품 코드 변경을 기록하지 않는다.
+
+### 3. 세션을 나누거나 이어가기
+
+| 상황 | 요청 예시 |
+| --- | --- |
+| 프로젝트별 세션 분리 | “이 세션은 프로젝트 A만 담당해. 프로젝트 B는 다른 세션에서 진행할게.” |
+| 기존 작업 재개 | “프로젝트 A의 Task `<ID 또는 경로>`를 이어가줘. 이전 담당과 실제 파일 상태부터 확인해.” |
+| 현재 상태 확인 | “프로젝트 A의 완료한 일·남은 일·막힌 이유를 Task 기준으로 알려줘.” |
+
+Obsidian에서 여러 세션을 열어도 **각 세션의 대상 repo·Task·담당 범위는 구분**한다. 같은 Task·파일이나 공유 DB·포트에 겹쳐 작업하지 않도록 확인한다. Task를 갱신하는 것만으로 다른 세션이 자동 실행되지는 않는다.
+
+중앙 wiki·harness는 clone에 포함되지 않는 [외부 환경](docs/external-dependencies.md)이다. Obsidian에서 시작한 세션의 다른 repo 편집 권한과 hook의 작업 기록 연결은 실제 환경에서 확인해야 한다. 현재 검증만으로 여러 프로젝트 세션의 자동 격리를 보장하지 않는다.
+
+## 공통 skill 설치와 사용
+
+[project-orchestrator](skills/project-orchestrator/SKILL.md)가 프로젝트 탐색과 Task 실행 진입을 연결한다. 기존 Orca `orchestration` skill은 필요할 때 제품 실행 세션을 조율하는 도구다.
+
+| 구성 | 위치와 역할 |
+| --- | --- |
+| skill 원본 | `skills/project-orchestrator/SKILL.md` — 이 repo에서 한 번만 관리 |
+| Codex 연결 | `~/.agents/skills/project-orchestrator` → 원본 디렉터리 |
+| Claude 연결 | `~/.claude/skills/project-orchestrator` → 같은 원본 디렉터리 |
+| Obsidian 진입점 | vault `AGENTS.md`에서 프로젝트 시작·재개·상태 조회 시 skill을 읽도록 연결 |
+| 프로젝트 프로필 | 기존 등록부의 repo·문서 위치와 프로젝트 index를 사용 |
+
+이 머신에는 두 연결과 vault 진입 안내를 설정했다. 다른 머신에서는 clone 경로를 실제 경로로 바꾸고 아래처럼 연결한다. 기존 경로가 있으면 덮어쓰지 말고 원본부터 확인한다.
+
+```sh
+mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills"
+ln -s /absolute/orchestration/skills/project-orchestrator "$HOME/.agents/skills/project-orchestrator"
+ln -s /absolute/orchestration/skills/project-orchestrator "$HOME/.claude/skills/project-orchestrator"
+```
+
+vault의 `AGENTS.md`에는 “프로젝트 시작·재개·상태 조회 시 project-orchestrator를 읽는다”는 안내와 실제 skill 경로를 연결한다. Claude의 공통 진입 지침도 해당 프로젝트 `AGENTS.md`를 읽도록 연결돼 있어야 한다. 원본 checkout을 유지하고 새 세션에서 skill 발견 여부를 확인한다.
+
+설정 후 Obsidian에서 새 세션을 열고 요청한다.
+
+> Laughtale의 knowledge-read-optimization Task 상태를 확인해줘.
+
+명시적으로 선택하려면 Codex에서는 `$project-orchestrator`, Claude에서는 `/project-orchestrator`를 사용할 수 있다. skill은 원본의 실제 경로를 기준으로 운영·측정 문서를 읽으며, 프로젝트 목록이나 진행 상태를 복제하지 않는다. Obsidian 세션이 조회·조율하고 제품 repo 세션이 코드 작업을 맡는다. 세션 실행 도구가 없으면 대상 repo·Task를 안내한다.
+
 ## 검증 범위
+
+Orca에서 Obsidian 경로로 시작한 Codex·Claude 새 세션이 공통 skill을 읽고 Laughtale의 지정 Task를 조회하는 것을 확인했다. 이는 읽기 전용 진입·프로젝트 연결 검증이며 제품 코드 변경·자동 분담 실행 검증은 아니다.
 
 별도 세션이 같은 Task를 읽고 작업을 인수해 수정·검증·기록하는 흐름을 실제로 확인했다. 중단·기록 재시도·동시 변경 판정은 격리된 회귀 시험으로 확인했다.
 
@@ -60,6 +108,7 @@ uv run python -m harness context /absolute/product/repo
 
 ## 저장소 구성
 
+- `skills/project-orchestrator/` — 프로젝트 탐색·Task 실행 진입 skill
 - `docs/` — 현재 운영 모델, 측정 기준, 가상 사례와 외부 방식 비교
 - `docs/images/task-session-flow.*` — README 구성도와 편집 가능한 SVG 원본
 - `skills/squad-model/`, `scripts/`, `examples/`, `tests/` — 이전 역할·계약 중심 실험과 검증 도구
