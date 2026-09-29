@@ -1,0 +1,11 @@
+{
+  "adapter": "local",
+  "executor": "codex",
+  "projects": [
+    {
+      "id": "replace-with-project-id",
+      "repo": "/replace/with/authorized/repository",
+      "tasks": "/replace/with/central/task-directory"
+    }
+  ]
+}

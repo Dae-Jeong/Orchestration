@@ -1,6 +1,6 @@
 # Obsidian Task 기반 운영 모델
 
-운영 절차의 정본이다. 기본 단위는 **중앙 Task 하나 + 담당 세션 하나**이며, 세션이 Task를 읽고 실행·검증·갱신한다. 자동 실행기나 동시 쓰기 잠금을 구현한 문서가 아니다.
+운영 절차의 정본이다. 기본 단위는 **중앙 Task 하나 + 담당 세션 하나**이며, 세션이 Task를 읽고 실행·검증·갱신한다. 기본 절차는 수동 실행이며, 자동 배정·실행 복구가 필요하면 선택적인 [compact scheduler](project-scheduler.md)를 사용한다. Markdown 작성자 간 동시 쓰기 잠금은 제공하지 않는다.
 
 ## 시작과 Task 생성
 
@@ -96,9 +96,20 @@ sequenceDiagram
 
 세션마다 새 Task를 만들지 않는다. Task 갱신은 자동 실행을 유발하지 않으며 기본 구성에서는 사용자가 세션을 시작한다. Markdown만으로 원자적 선점·동시 쓰기 방지가 보장되지 않는다.
 
+## 메인 감독과 worker 질문·재개·완료
+
+메인 세션이 worker를 감독할 때도 정본은 기존 Task다. 메인은 배정 전에 Task·범위·담당을 정하고, worker는 실제 session ID를 Task에 바인딩한 뒤 같은 Task에서 작업한다. 질문·답변·막힘·완료는 Task에 append한 Markdown 항목과 SQLite 참조 이벤트로 주고받는다. 본문은 Task에, 전달·처리 상태와 ACK만 원장에 둔다.
+
+1. worker가 질문 항목을 추가하고 `ref publish --kind question.opened`를 실행한 뒤 답을 기다리는 동안 그 Task를 쓰지 않는다.
+2. 메인이 `ref wait`로 받아 `read`·`processed`·`ack`를 기록하고, 답변 항목을 추가해 `question.answered`를 publish한다.
+3. worker가 `ref wait`로 답을 받아 hash 검증된 본문을 적용하고 `processed applied`·`ack`를 기록한 뒤 작업을 재개한다. 막히면 `work.blocked`, 끝나면 `work.completed`를 보낸다.
+4. 메인이 완료 이벤트를 받아 실제 결과를 검토하고 Task 수용을 결정한다. ACK는 처리 기록이지 Task 완료가 아니다.
+
+명령·상태·hash 규칙은 [Task 항목 참조 이벤트](scheduler-task-events.md)가 소유한다. 전달은 pull 방식이라 수신자가 활성 세션에서 `wait`를 실행해야 한다. Task 수정만으로 이벤트가 publish되지 않고, idle 세션을 깨우는 기능·승인 대기 감지 hook·일반 TUI와 scheduler attempt의 통합은 없다. 실제 왕복은 Claude·Kiro worker에서 성공했고 Codex worker는 readiness 확인 실패로 검증되지 않았다([검증 범위](project-scheduler-validation.md#task-item-reference-events)).
+
 ## 적용 범위와 근거
 
-여러 Task 선택에는 우선순위·선행 조건·실제 담당 확인이, 병렬 실행에는 충돌 제어·결과 통합이, 자동 재개에는 별도 트리거·중복 실행 방지·중단/복구 정책이 추가로 필요하다. 이 문서는 그 자동화를 구현하지 않는다.
+여러 Task 선택에는 우선순위·선행 조건·실제 담당 확인이, 병렬 실행에는 충돌 제어·결과 통합이, 자동 재개에는 별도 트리거·중복 실행 방지·중단/복구 정책이 추가로 필요하다. 선택적인 [compact scheduler](project-scheduler.md)는 공유 원장의 단일 슬롯, 이벤트·실행 복구와 제한된 LLM 재계획을 구현한다. 자동 실행을 선택하지 않은 기본 세션 흐름에는 이 프로세스가 필요하지 않다.
 
 기존 도구에 활성 업무가 있으면 담당·상태·증거와 업무별 정본을 먼저 확인한다. 기존 데이터나 제품별 채택 모델을 자동 전환하지 않는다. `skills/squad-model/`은 이전 역할 중심 구성으로, 재사용할 때 현재 모델과의 호환을 따로 확인한다.
 

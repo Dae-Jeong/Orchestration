@@ -70,6 +70,16 @@ Obsidian에서 여러 세션을 열어도 **각 세션의 대상 repo·Task·담
 
 중앙 wiki·harness는 clone에 포함되지 않는 [외부 환경](docs/external-dependencies.md)이다. Obsidian에서 시작한 세션의 다른 repo 편집 권한과 hook의 작업 기록 연결은 실제 환경에서 확인해야 한다. 현재 검증만으로 여러 프로젝트 세션의 자동 격리를 보장하지 않는다.
 
+## 선택적 compact scheduler
+
+일상 배정과 결과 수집은 Python이 맡고, 우선순위 충돌·연결 작업 유입·계획 변경에만 메인 LLM을 호출한다. 기존 Markdown Task를 정본으로 쓰며 두 프로젝트도 하나의 실행 슬롯과 원장을 공유한다. 로컬 명령과 Orca terminal adapter를 지원한다.
+
+`uv sync --locked` 후 승인된 프로젝트·worker 명령을 설정하고 `uv run python -m scheduler --config .runtime/scheduler.json --state .runtime/scheduler run`으로 수동 시작한다. 실행 중단 후에는 같은 state 경로로 재시작한다. 실행 여부가 불명확하면 자동 재시도하지 않으며 종료와 Task 수용을 구분한다.
+
+메인 감독 아래 worker의 질문·답변·막힘·완료는 기존 Task에 추가한 항목과 SQLite 참조 이벤트(`ref publish/wait/read/processed/ack`)로 주고받는다([운영 모델](docs/task-session-model.md#메인-감독과-worker-질문재개완료)). 수신자가 활성 세션에서 기다려야 전달되며, Task 수정만으로 자동 publish되지 않고 idle wake·승인 대기 hook·일반 TUI의 scheduler 통합은 없다. 실제 왕복은 Claude·Kiro에서 확인했고 Codex worker는 검증되지 않았다.
+
+[설정·Task 계약·복구](docs/project-scheduler.md) · [대상별 지시·처리 ACK](docs/scheduler-messaging.md) · [Task 배정·인수 ACK](docs/scheduler-assignment.md) · [Task 항목 참조 이벤트](docs/scheduler-task-events.md) · [검증 범위](docs/project-scheduler-validation.md). 자동 게시와 daemon 설치는 포함하지 않는다.
+
 ## 공통 skill 설치와 사용
 
 [project-orchestrator](skills/project-orchestrator/SKILL.md)가 프로젝트 탐색과 Task 실행 진입을 연결한다. 기존 Orca `orchestration` skill은 필요할 때 제품 실행 세션을 조율하는 도구다.
@@ -104,10 +114,11 @@ Orca에서 Obsidian 경로로 시작한 Codex·Claude 새 세션이 공통 skill
 
 별도 세션이 같은 Task를 읽고 작업을 인수해 수정·검증·기록하는 흐름을 실제로 확인했다. 중단·기록 재시도·동시 변경 판정은 격리된 회귀 시험으로 확인했다.
 
-자동 배정·자동 재개와 동시 쓰기 잠금은 제공하지 않는다. 세션 종료나 문서 검사 통과만으로 제품 작업의 완료를 판단하지 않는다. [검증 결과와 한계 · 로컬 의존성](docs/external-dependencies.md#local-2)
+기본 Task·세션 흐름은 수동으로 시작한다. 선택적인 [compact scheduler](docs/project-scheduler.md)는 Python 지속 프로세스·공유 SQLite 원장으로 단일 슬롯 자동 배정과 실행 복구를 제공한다. Markdown 작성자 간 동시 쓰기 잠금은 제공하지 않는다. 세션 종료나 문서 검사 통과만으로 제품 작업의 완료를 판단하지 않는다. [검증 결과와 한계 · 로컬 의존성](docs/external-dependencies.md#local-2)
 
 ## 저장소 구성
 
+- `scheduler/` — compact scheduler CLI·실행 원장·adapter·계획 검증
 - `skills/project-orchestrator/` — 프로젝트 탐색·Task 실행 진입 skill
 - `docs/` — 현재 운영 모델, 측정 기준, 가상 사례와 외부 방식 비교
 - `docs/images/task-session-flow.*` — README 구성도와 편집 가능한 SVG 원본

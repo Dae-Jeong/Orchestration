@@ -5,7 +5,7 @@ description: Start, resume, or inspect a named project through an Obsidian vault
 
 # Project orchestrator
 
-Use the operator's existing project registry and Task owners. This skill is a routing entry, not a scheduler or a second task database.
+Use the operator's existing project registry and Task owners. This skill routes project work and the optional compact scheduler; the central Task remains the work owner.
 
 ## Resolve the operating context
 
@@ -32,3 +32,15 @@ A session's startup workspace and its command working directory are different co
 Follow the shared work policy for preservation, checks, session binding and evidence recording. Keep status, result and next action in the original Task; code and raw output remain in the product repo, history in Log. The executing session records its own changes; never reconcile or record a live worker's unfinished call on its behalf.
 
 Judge completion against the Task's actual goal and acceptance conditions. Select additional BE/FE measurements only where relevant. Return the project, Task, verified result and remaining work. Skill discovery, terminal launch and document validation are not proof of successful product execution.
+
+## Optional continuous scheduling
+
+When the user requests ongoing execution across authorized Tasks, read [the compact scheduler contract](../../docs/project-scheduler.md). The Python process owns routine ticks, a single shared execution slot, receipts and recovery; the main LLM returns a revision-checked order only for scheduling conflicts, related task intake or invalidated plans. Use one state directory across participating projects.
+
+Inspect `status` before starting or recovering execution. Configure explicit project roots, central Task directories and the common executor/model policy (or authorized custom worker argv); keep effort at its configured default and do not add per-Task launcher metadata; never enroll unrelated work. Run the CLI manually with the same config/state on restart. An ambiguous launch holds its slot: inspect the original attempt and require stopped-process evidence before explicit retry, with no in-flight adapter fallback. Task acceptance follows the central record and actual evidence, not terminal or process exit. Configuration, JSON plan response and recovery details belong in the linked contract. Do not install a daemon or publish as part of scheduler setup.
+
+## Messages during a scheduled attempt
+
+To start scheduler work, assign it (`assign --task --role --scope/--output`) per [the assignment contract](../../docs/scheduler-assignment.md) instead of pasting long prompts into terminals. For an executing scheduler worker, read [the addressed-message protocol](../../docs/scheduler-messaging.md); first take over the `assignment:<attempt>` message by echoing its `expect` fields in the applied report. Use the absolute CLI and execution identity in the startup instruction/environment; do not write SQL. Pull inbox at startup, natural work boundaries and before completion. Claim grants delivery ownership, not application. Persist the actual applied/deferred/conflict result, then ACK its current token. Reuse a saved result after ACK loss; reconcile uncertain external effects before repeat.
+
+The owner updates Goal/Scope/Acceptance Criteria before sending that instruction revision. Ordinary progress edits do not fence messages. Submit completion only after checking the latest inbox/revision and resolving required instructions. A queued message, terminal accepted receipt, applied ACK and accepted Task are distinct. Existing running legacy attempts are not restarted or silently upgraded. See the contract for FIFO, held-message reconciliation, provider support and first-run consent limits.
