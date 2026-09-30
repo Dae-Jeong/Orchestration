@@ -76,9 +76,99 @@ Obsidian에서 여러 세션을 열어도 **각 세션의 대상 repo·Task·담
 
 `uv sync --locked` 후 승인된 프로젝트·worker 명령을 설정하고 `uv run python -m scheduler --config .runtime/scheduler.json --state .runtime/scheduler run`으로 수동 시작한다. 실행 중단 후에는 같은 state 경로로 재시작한다. 실행 여부가 불명확하면 자동 재시도하지 않으며 종료와 Task 수용을 구분한다.
 
-메인 감독 아래 worker의 질문·답변·막힘·완료는 기존 Task에 추가한 항목과 SQLite 참조 이벤트(`ref publish/wait/read/processed/ack`)로 주고받는다([운영 모델](docs/task-session-model.md#메인-감독과-worker-질문재개완료)). 수신자가 활성 세션에서 기다려야 전달되며, Task 수정만으로 자동 publish되지 않고 idle wake·승인 대기 hook·일반 TUI의 scheduler 통합은 없다. 실제 왕복은 Claude·Kiro에서 확인했고 Codex worker는 검증되지 않았다.
+조회 전용 `watch`는 대기·문제·진행·세션 네 구역을 보여 주며 `--project`로 거르고 `--json`으로 같은 데이터를 낸다. 세션은 `--harness-root`를 준 경우 harness 공개 CLI에서 읽는다. 마지막 활동은 CLI 세션 파일 mtime(stat만)이고, live Orca terminal·dispatch는 조회용 명령으로 읽으며 기록된 근거가 있을 때만 세션에 연결한다([watch](docs/project-scheduler.md#터미널-진행-조회-watch)).
+
+메인 감독 아래 worker의 질문·답변·막힘·완료는 기존 Task에 추가한 항목과 SQLite 참조 이벤트(`ref publish/wait/read/processed/ack`)로 주고받는다([운영 모델](docs/task-session-model.md#메인-감독과-worker-질문재개완료)). 수신자가 활성 세션에서 기다려야 전달되며, Task 수정만으로 자동 publish되지 않고 승인 대기 hook·일반 TUI의 scheduler 통합은 없다. idle wake는 수신 실행이 `orca:<terminal handle>`일 때 `ref publish --wake`/`ref wake`로 유휴 terminal에 고정 문구 한 번을 보내는 best effort뿐이다(작업 중이면 보내지 않음, receipt는 입력 수락만 증명; 제품 코드의 실제 유휴 메인 재개는 미검증, [wake](docs/scheduler-task-events.md#유휴-orca-수신자-wakebest-effort)). 실제 왕복은 Claude·Kiro에서 확인했고 Codex worker는 검증되지 않았다.
 
 [설정·Task 계약·복구](docs/project-scheduler.md) · [대상별 지시·처리 ACK](docs/scheduler-messaging.md) · [Task 배정·인수 ACK](docs/scheduler-assignment.md) · [Task 항목 참조 이벤트](docs/scheduler-task-events.md) · [검증 범위](docs/project-scheduler-validation.md). 자동 게시와 daemon 설치는 포함하지 않는다.
+
+### 내부 동작 · 원장·참조 이벤트·wake·watch·세션 연결
+
+정본은 셋으로 나뉜다. **업무 상태는 Task Markdown**, **실행·전달 상태는 scheduler 원장(SQLite)**, **세션과 Task·terminal의 연결은 harness `work_sessions`**에 둔다. Orca는 terminal과 dispatch 실행을 제공할 뿐 업무 상태를 소유하지 않는다. `watch`는 넷을 모두 읽기만 하고 아무것도 쓰지 않는다.
+
+```mermaid
+flowchart LR
+    P["worker·메인 세션"]
+    subgraph VAULT["Obsidian vault"]
+        T["Task Markdown<br/>frontmatter·본문<br/>item marker + SHA-256"]
+        H[("harness hook-state<br/>work_sessions<br/>agent:session · Task · terminal")]
+    end
+    subgraph STATE["scheduler state"]
+        DB[("ledger.sqlite3<br/>attempts · messages<br/>ref_events · message_audit")]
+        AT["attempts/UUID<br/>spec · started · exited 영수증"]
+    end
+    O["Orca<br/>terminals · dispatch runs"]
+    S["scheduler run·tick"]
+    R["scheduler ref CLI"]
+    W["watch 조회 전용"]
+
+    P -->|"항목 append·결과 기록"| T
+    P -->|"work bind"| H
+    P -->|"publish·wait·read·processed·ack"| R
+    S -->|"Task 읽기·배정·영수증 수집"| DB
+    S -->|"launch"| O
+    O -->|"worker 실행"| AT
+    R -->|"item hash 계산·재검증"| T
+    R -->|"envelope·상태·감사"| DB
+    R -->|"wake: show → tui-idle → send"| O
+    W -.->|"frontmatter·item hash"| T
+    W -.->|"SQLite mode=ro"| DB
+    W -.->|"영수증 stat·읽기"| AT
+    W -.->|"harness work status CLI"| H
+    W -.->|"status · terminal list · worker-list"| O
+```
+
+- **참조 이벤트:** 본문은 Task 항목에만 있고 원장 `ref_events`에는 Task·item ID·hash와 전달 상태만 둔다. claim·read·processed 때마다 hash를 다시 계산해 다르면 내용을 주지 않고 `held`로 둔다. 전달은 수신자가 `ref wait/claim`하는 pull이다([참조 이벤트](docs/scheduler-task-events.md)).
+- **idle wake:** 수신 실행이 `orca:<terminal handle>`일 때만, 유휴 terminal에 원장 명령이 담긴 고정 문구 한 줄을 한 번 보낸다. 이벤트 상태는 바꾸지 않고 결과만 `message_audit`에 남긴다.
+- **세션·terminal 연결:** `work bind`가 `ORCA_TERMINAL_HANDLE`(또는 `--terminal`)을 `orca:<handle>`로 기록하고, `watch`는 이 값이 live Orca handle과 정확히 같을 때만 세션과 terminal을 잇는다. 근거가 없으면 `session unknown`이다([watch](docs/project-scheduler.md#세션-대기문제진행-조회)).
+
+worker 완료 보고부터 Task 수용까지 한 번의 왕복은 다음과 같다. 단계마다 증명하는 범위가 다르다.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant WK as worker
+    participant T as Task Markdown
+    participant C as ref CLI
+    participant DB as 원장 SQLite
+    participant O as Orca
+    participant M as 메인 orca terminal
+
+    WK->>T: 결과 항목 append
+    WK->>C: ref publish --wake work.completed to-exec orca:handle
+    C->>T: 항목 읽기·SHA-256
+    C->>DB: ref_events 저장
+    Note over C,DB: stored true = 저장만 증명
+    C->>DB: ① 미처리 이벤트·중복 억제 확인
+    C->>O: ② terminal show (stale·orphaned 아님)
+    C->>O: ③ terminal wait --for tui-idle
+    alt 유휴
+        C->>DB: ④ 미처리 재확인
+        C->>O: ⑤ terminal send 고정 문구 한 줄
+        O-->>C: receipt stages input_accepted
+        C->>DB: message_audit ref.wake_requested
+        Note over C,O: 입력 수락만 증명 (turn 시작 아님)
+        O->>M: 문구 입력으로 새 turn
+    else 작업 중·미처리 없음·cooldown 안
+        C->>DB: ref.wake_skipped busy·no_pending·duplicate
+        Note over O,M: 보내지 않음. 이벤트는 다음 ref wait까지 저장
+    else Orca 없음·terminal stale
+        C->>DB: ref.wake_failed (이벤트는 claim 가능)
+    end
+    M->>C: ref wait --exec orca:handle
+    C->>DB: ref.claimed
+    Note over M,DB: 수신 turn 시작의 근거
+    M->>C: ref read token
+    C->>T: hash 재검증, 다르면 held
+    C-->>M: 검증된 본문
+    M->>C: ref processed applied 후 ref ack
+    C->>DB: ref.acknowledged
+    Note over M,DB: 처리 ACK (질문 해결·done 아님)
+    M->>T: owner가 결과 검증 후 Current Result·done + evidence
+    Note over M,T: Task 수용은 owner 선언만
+```
+
+`input_accepted`는 Orca가 입력을 받았다는 뜻일 뿐이다. turn 시작은 수신자의 이후 `ref.claimed`로, 처리는 `ref.acknowledged`로, 완료는 Task owner의 기록으로 각각 따로 확인한다([네 상태 구분](docs/scheduler-task-events.md#유휴-orca-수신자-wakebest-effort)). `watch`는 이 과정의 WAITING·PROBLEMS(held·stale·`wake_failed`·반복 `busy`)를 보여 주지만 CLI 승인 대기는 감지하지 못해 `unsupported`로 표시한다.
 
 ## 공통 skill 설치와 사용
 
@@ -114,7 +204,7 @@ Orca에서 Obsidian 경로로 시작한 Codex·Claude 새 세션이 공통 skill
 
 별도 세션이 같은 Task를 읽고 작업을 인수해 수정·검증·기록하는 흐름을 실제로 확인했다. 중단·기록 재시도·동시 변경 판정은 격리된 회귀 시험으로 확인했다.
 
-기본 Task·세션 흐름은 수동으로 시작한다. 선택적인 [compact scheduler](docs/project-scheduler.md)는 Python 지속 프로세스·공유 SQLite 원장으로 단일 슬롯 자동 배정과 실행 복구를 제공한다. Markdown 작성자 간 동시 쓰기 잠금은 제공하지 않는다. 세션 종료나 문서 검사 통과만으로 제품 작업의 완료를 판단하지 않는다. [검증 결과와 한계 · 로컬 의존성](docs/external-dependencies.md#local-2)
+기본 Task·세션 흐름은 수동으로 시작한다. 선택적인 [compact scheduler](docs/project-scheduler.md)는 Python 지속 프로세스·공유 SQLite 원장으로 단일 슬롯 자동 배정과 실행 복구를 제공한다. Markdown 작성자 간 동시 쓰기 잠금은 제공하지 않는다. idle wake는 Orca `orca:<handle>` 수신 실행 전용 best effort다. 일회용 Kiro TUI에서 busy skip·orphaned 실패는 실제로 확인했지만, shell에서 시작한 메인 terminal에서는 `tui-idle`이 한 번도 충족되지 않아 유휴 메인이 wake로 실제 재개되는 흐름은 아직 검증하지 않았다. CLI 승인 대기는 감지하지 않는다(`watch`에서 `unsupported`). 세션 종료나 문서 검사 통과만으로 제품 작업의 완료를 판단하지 않는다. [검증 결과와 한계 · 로컬 의존성](docs/external-dependencies.md#local-2)
 
 ## 저장소 구성
 

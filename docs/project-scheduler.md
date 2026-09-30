@@ -53,7 +53,7 @@ uv run python -m scheduler --config .runtime/scheduler.json --state .runtime/sch
 uv run python -m scheduler --config .runtime/scheduler.json --state .runtime/scheduler watch --interval 5 --width 80
 ```
 
-`status`와 attempt 디렉터리의 영수증(`spec`·`started`·`exited`·`terminal.json`)을 매번 다시 읽어 사람이 읽는 화면으로 보여 주는 **조회 전용** 명령이다. tick·launch·claim·ACK·close·Task 수정을 호출하지 않고 하위 프로세스도 만들지 않는다. 표준 라이브러리만 쓴다. 새 정본이나 캐시를 만들지 않으며, 없는 config·state 경로는 오류로 표시할 뿐 생성하지 않는다. 원장은 SQLite `mode=ro` 연결로 열며 스키마 생성·migration·journal mode 변경을 하지 않는다. WAL 원장에서는 SQLite가 읽기 잠금용 `-wal`·`-shm` 파일을 스스로 만들 수 있다. 이때 `-wal`은 비어 있고 원장 파일 byte는 바뀌지 않는다. scheduler 원장이 아닌 SQLite 파일, 테이블·열이 빠진 이전·불완전 원장, SQLite가 아닌 파일은 변경 없이 `ERROR`로 진단한다. 원장 초기화는 writer(`run`·`tick` 등)만 한다.
+`status`와 attempt 디렉터리의 영수증(`spec`·`started`·`exited`·`terminal.json`)을 매번 다시 읽어 사람이 읽는 화면으로 보여 주는 **조회 전용** 명령이다. tick·launch·claim·ACK·close·Task 수정을 호출하지 않는다. 하위 프로세스는 harness 조회를 설정했을 때의 `harness work status`와 Orca 조회 명령(`status`·`terminal list`·`orchestration worker-list`)뿐이다([세션 조회](#세션-대기문제진행-조회)). 표준 라이브러리만 쓴다. 새 정본이나 캐시를 만들지 않으며, 없는 config·state 경로는 오류로 표시할 뿐 생성하지 않는다. 원장은 SQLite `mode=ro` 연결로 열며 스키마 생성·migration·journal mode 변경을 하지 않는다. WAL 원장에서는 SQLite가 읽기 잠금용 `-wal`·`-shm` 파일을 스스로 만들 수 있다. 이때 `-wal`은 비어 있고 원장 파일 byte는 바뀌지 않는다. scheduler 원장이 아닌 SQLite 파일, 테이블·열이 빠진 이전·불완전 원장, SQLite가 아닌 파일은 변경 없이 `ERROR`로 진단한다. 원장 초기화는 writer(`run`·`tick` 등)만 한다.
 
 - 상단: 조회 시각, state 경로, 실행 슬롯(`free` 또는 현재 attempt), launch 전 `pending`·`held` 배정.
 - attempt별(실행 중인 것부터, 그다음 최신 순서로 최대 8개): 전체 attempt ID, Task 파일 상태(`status`, 읽기 실패·없는 파일·malformed 표시), assignment·role, 실제 executable(설정 command의 `argv[0]` 또는 preset launcher의 `--executable`)과 model, 원장 상태, 시각, delivered/taken_over, 메시지 상태별 개수와 미처리 required 메시지, worker 완료 보고, 수용 여부와 blocker, cleanup 상태, terminal handle과 identity 기록 여부, stdout/stderr 경로와 크기를 **각각 별도 줄**에 표시한다.
@@ -61,6 +61,32 @@ uv run python -m scheduler --config .runtime/scheduler.json --state .runtime/sch
 - worker 완료 보고는 `worker report, not acceptance`로 표시하고 수용·terminal 종료와 구분한다. 수용 전 attempt의 cleanup은 `not eligible`, `withheld`·`failed`는 운영자 확인이 필요한 `[operator]`로 표시한다.
 - TTY에서는 화면 맨 위로 이동해 같은 화면을 덮어쓰고 터미널 높이에 맞춰 자른다. 파이프·파일 출력과 `--once`에는 ANSI 코드를 쓰지 않는다. `--width`(기본값은 TTY 폭, 비TTY는 0이며 0은 자르지 않음)를 주면 긴 값의 가운데를 `~`로 줄이고 앞의 식별자와 끝의 경로는 남긴다.
 - 조회가 실패하면(DB 잠김, config 오류 등) `ERROR` 화면을 보여 주고 다음 간격에 다시 조회한다. `--once`는 이 경우 exit 2로 끝난다. Ctrl-C는 viewer만 끝내고(exit 0) scheduler와 worker에는 signal을 보내지 않는다.
+
+#### 세션 대기·문제·진행 조회
+
+```sh
+uv run python -m scheduler --config C --state S watch --once --harness-root /absolute/vault --project llm-wiki --project live
+uv run python -m scheduler --config C --state S watch --once --json      # 화면과 같은 데이터, 갱신마다 JSON 한 줄
+```
+
+화면은 `SOURCES` 다음에 **WAITING → PROBLEMS → PROGRESS → SESSIONS → TERMINALS, SESSION UNKNOWN** 순서로 나온다. PROGRESS는 위의 기존 attempt 화면이다. 세션 key는 `에이전트:세션ID`이며 ref 참여자 주소가 이 key와 **정확히 같을 때만** 세션에 `refs`로 붙인다.
+
+| 구역 | 내용 | source |
+| --- | --- | --- |
+| WAITING | `acked`·`dismissed`·`held`가 아니고 item이 최신인 ref 이벤트(수신자·발신자·Task item·게시 시각·마지막 wake), `blocked`·`review` Task. CLI 승인 대기는 `unsupported` | 원장 `ref_events`·`message_audit`, 설정 Task 디렉터리 frontmatter |
+| PROBLEMS | `held` 이벤트, item hash가 바뀐 stale 이벤트(원장에는 아직 held 아님), 마지막 wake가 `wake_failed`이거나 `busy` 2회 이상, `failed`·`unknown` attempt, 수용 blocker, 읽을 수 없는 Task, harness 세션 issue | 같은 source + harness |
+| PROGRESS | 실행 슬롯, 저장된 배정, attempt별 배정→인수→보고→수용→정리. 보고·수용·종료는 각각 다른 줄 | 원장·attempt 영수증 |
+| SESSIONS | harness에 bind된 세션의 project·Task·workspace·call·issue, CLI 세션 파일의 `last activity`, 근거(harness terminal 정확 일치, 없으면 ref 짝)가 있는 Orca terminal. 최근 bind가 먼저 오고 기본 8개(`--sessions N` 또는 `--sessions all`)까지 보이며 나머지는 `N more not shown`으로 표시한다. `--json`에는 항상 전체가 들어간다 | harness 공개 CLI, 세션 파일 stat, Orca |
+| TERMINALS, SESSION UNKNOWN | 세션과 연결할 근거가 없는 live Orca terminal: worktree, Orca 필드(agent·connected·orphaned·마지막 출력), dispatch(Task·worker 상태·liveness), ref 참여자·scheduler attempt 근거 | Orca `terminal list`·`orchestration worker-list`, 원장 |
+
+- **harness**: `--harness-root` 또는 config `harness_root`(config 기준 상대 경로)가 있을 때만 그 폴더에서 `uv run --quiet python -m harness work status`(config `harness_command`로 앞부분 교체 가능)를 실행해 JSON을 읽는다. viewer가 만드는 유일한 하위 프로세스이며 harness 저장소를 직접 읽지 않는다. exit 1은 issue가 있는 세션이 있다는 뜻이므로 JSON이 올바르면 사용한다. 설정 없음·폴더 없음·실행 실패·timeout(30초)·다른 exit·malformed JSON은 `unavailable`로 표시하고 다른 구역은 계속 보여 준다.
+- **`--project ID`(반복)**: ref 이벤트·배정은 Task key의 `project/`, attempt·Task는 설정 project id, 세션은 harness `project`로 거른다. 둘은 같은 이름이어야 연결되며 repo 경로 등으로 추정하지 않는다. 실행 슬롯은 모든 프로젝트가 공유하므로 필터 밖 attempt가 점유 중이면 `(outside --project; the one slot is shared)`로 표시한다.
+- **exit 2**는 원장·config 조회 실패만 뜻한다. 원장이 없어도 Task·harness 구역은 표시하고 원장·state 경로는 만들지 않는다. `ref` 명령을 쓴 적 없는 원장은 `ref events none`으로 표시하며 table을 추가하지 않는다.
+- **세션 순서**: harness 출력에는 시각이 없다. `work status`는 `ORDER BY` 없이 조회하며, 관측상 처음 bind한 순서(새 세션은 끝에 추가, 다시 bind해도 위치 유지)로 나온다. watch는 이 순서를 뒤집어 보여 주고 `order` 줄과 JSON `session_order`에 그 근거를 적는다. 문서화된 보장이 아니므로 harness가 순서를 바꾸면 이 표시도 달라진다.
+- **마지막 활동(`last activity`)**: 해당 CLI가 이 세션 ID로 쓰는 자기 세션 파일의 mtime이다. `os.stat`만 쓰며 파일을 열거나 내용을 출력하지 않는다. 생존 여부가 아니라 마지막 기록 시각이다. 이 머신에서 확인한 경로는 다음과 같다. Kiro는 `~/.kiro/sessions/cli/<id>.jsonl`, Codex는 `$CODEX_HOME`(기본 `~/.codex`)의 `sessions/YYYY/MM/DD/rollout-*-<id>.jsonl`, Claude는 `$CLAUDE_CONFIG_DIR`(기본 `~/.claude`)의 `projects/*/<id>.jsonl`이다. config `session_file_roots`로 provider별 home을 바꿀 수 있다. 파일이 없거나 여러 개면 `unavailable`이다. Kiro turn marker(`$KIRO_TURN_MARKER_DIR`)는 파일 이름이 `<pid>-<ms>.json`이라 내용을 읽지 않고는 세션 ID와 연결할 수 없어 쓰지 않는다. `.lock` 파일도 생존 근거로 쓰지 않는다.
+- **Orca**: `orca`(config `orca_command` 또는 PATH)가 있고 `orca status --json`의 runtime이 `ready`·reachable일 때만 `terminal list --json`과 `orchestration worker-list --json`을 호출한다. 두 명령은 help와 bundled skill이 조회용으로 설명하는 명령이다. `terminal wait`(tui-idle 소비), `send`, `check`, `close`, `terminal read`는 호출하지 않으며 terminal preview도 출력하지 않는다. 세션과 terminal은 기록된 근거로만 연결한다(아래 harness terminal 연결). ref 이벤트가 harness 세션 key와 `orca:<handle>`/`<agent>:<handle>` 실행 주소를 짝지은 기록은 harness terminal 값이 없을 때 이전과 같이 `terminal <handle> via (ref … identity)`로 연결하고, harness 연결이 있으면 그 아래 `ref pairing` 보조 표시로만 남는다. 폴더·agent 이름으로는 연결하지 않는다. dispatch 기록과 scheduler `terminal.json`은 Task·attempt 근거로만 붙이고 세션 ID로 추정하지 않는다. `--project`를 주면 설정 repo와 해당 harness 세션 workspace의 terminal, 그리고 근거가 있는 terminal만 보인다. 생존·유휴에 관해서는 Orca 필드만 출처를 밝혀 적는다(`connected`·`orphaned`·`lastOutputAt`, dispatch `liveness` verdict). 미처리 ref의 수신 terminal이 live 목록에 없으면 PROBLEMS에 `recipient terminal not live`로 나온다. Orca가 없거나 비정상이면 `unavailable`이며 다른 구역은 그대로다.
+- **harness terminal 연결**: harness `work status`의 세션에 `terminal`(`work bind`가 `--terminal` 또는 `ORCA_TERMINAL_HANDLE`에서 기록)과 `terminal_source`(`explicit`/`env`)가 있으면, 그 값이 live terminal의 `orca:<handle>`과 **정확히 같을 때만** 세션 아래에 `terminal <handle>`, `worktree … (terminal list)`, Orca 필드, dispatch, `link harness terminal (<terminal_source>)`를 표시하고 그 terminal을 TERMINALS, SESSION UNKNOWN에서 뺀다. `--project`로 걸러도 연결된 terminal은 보인다. 접두사·대소문자·공백이 다르거나 live 목록에 없는 값은 연결하지 않고 `<값> recorded by harness (<source>); not in live orca terminal list`로 적는다. Orca가 없거나 비정상이면 `<값> recorded by harness (<source>); not verified live: Orca unavailable`로 기록값만 보여 준다. 값은 bind한 프로세스가 스스로 보고한 것이며 watch가 소유를 검증하지 않는다. 필드가 없거나 `null`인 세션(이전 harness, 변경 전 bind)은 이전과 똑같이 동작한다.
+- **관측 불가(추정하지 않음)**: bind하지 않은 세션은 보이지 않는다. harness terminal 값도 ref 짝 기록도 없는 terminal은 `session unknown`으로 나온다. 답변 item의 stale 여부(질문 변경·재질문)는 다시 계산하지 않고 원장이 held로 바꾼 뒤에 PROBLEMS에 나온다. harness 호출 때문에 갱신마다 1초 안팎이 더 걸릴 수 있다.
 
 ## Task 최소 계약과 소유권
 

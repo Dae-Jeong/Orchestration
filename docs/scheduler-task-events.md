@@ -31,7 +31,7 @@ worker와 메인(coordinator)이 질문·답변·완료·막힘을 **Task의 Mar
 
 본문은 SQLite에 저장하지 않는다. 처리 보고(report)만 저장한다.
 
-**신원:** 참여자·실행 문자열은 같은 호스트·같은 OS 사용자 안의 **자기 선언**이며 인증이 아니다. native dispatch의 권한은 문자열만으로 증명되지 않는다. CLI는 선언된 수신자·실행과 이벤트가 정확히 일치하는지(claim/read/processed/ack), 답변자가 질문의 수신자이고 질문 발신 실행에게 보내는지, 같은 Task인지를 검사한다. 예외적으로 `scheduler:<attempt>` 실행은 원장의 live attempt이고 그 attempt의 Task와 같아야 하며, `SCHEDULER_ATTEMPT` 환경 안에서는 이 형식만 허용한다. 권장 주소: 메인 `orca:<terminal handle>` + `orca-run:<run id>`, worker `kiro:<terminal handle>` + `orca-dispatch:<dispatch id>`. 세션 ID를 지어내지 않는다.
+**신원:** 참여자·실행 문자열은 같은 호스트·같은 OS 사용자 안의 **자기 선언**이며 인증이 아니다. native dispatch의 권한은 문자열만으로 증명되지 않는다. CLI는 선언된 수신자·실행과 이벤트가 정확히 일치하는지(claim/read/processed/ack), 답변자가 질문의 수신자이고 질문 발신 실행에게 보내는지, 같은 Task인지를 검사한다. 예외적으로 `scheduler:<attempt>` 실행은 원장의 live attempt이고 그 attempt의 Task와 같아야 하며, `SCHEDULER_ATTEMPT` 환경 안에서는 이 형식만 허용한다. 권장 주소: 메인 `orca:<terminal handle>` + `orca-run:<run id>`(wake를 받으려면 실행을 `orca:<terminal handle>`로), worker `kiro:<terminal handle>` + `orca-dispatch:<dispatch id>`. 세션 ID를 지어내지 않는다.
 
 ## 명령
 
@@ -48,6 +48,7 @@ $CLI read    $ME --id EVT --token TOKEN                             # hash 검�
 $CLI processed $ME --id EVT --token TOKEN --outcome applied|deferred|conflict --report-file R.json [--reconciliation TEXT]
 $CLI ack     $ME --id EVT --token TOKEN
 $CLI inbox   $ME;  $CLI claim $ME;  $CLI show --id EVT;  $CLI dismiss $ME --id EVT --reason TEXT
+$CLI wake    --to RECIPIENT --to-exec orca:TERM_HANDLE [--id EVT]     # 유휴 Orca 수신자 best-effort wake(아래)
 ```
 
 ## 단계와 상태
@@ -60,10 +61,47 @@ $CLI inbox   $ME;  $CLI claim $ME;  $CLI show --id EVT;  $CLI dismiss $ME --id E
 
 ACK는 수신자가 처리를 기록했다는 뜻이지 질문 해결·Task done이 아니다. 해결 여부는 질문자가 답변을 적용한 결과로 Task에 기록하고, Task done은 기존대로 owner만 선언한다. `work.completed` ACK는 scheduler attempt의 종료 영수증·완료 제출·acceptance gate를 대신하거나 약화하지 않는다. `dismiss`는 발신 실행 또는 수신자가 사유와 함께 stale/held 이벤트를 치울 때 쓰며 live claim과 applied ACK에는 쓸 수 없다.
 
+## 유휴 Orca 수신자 wake(best effort)
+
+이벤트 전달은 계속 pull이다. wake는 **유휴 상태로 turn을 끝낸 수신 실행에 주의를 한 번 끄는 입력**일 뿐이며 이벤트 상태·ACK를 바꾸지 않는다. 새 테이블·큐·daemon은 없고 결과는 기존 `message_audit`에 `ref:<event id>`(대상 이벤트가 없으면 `ref:wake:<exec>`) / `ref.wake_requested|wake_skipped|wake_failed`로 남는다.
+
+```sh
+$CLI publish $ME --id EVT ... --to RECIPIENT --to-exec orca:TERM_HANDLE --wake [--orca PATH] [--cooldown S] [--idle-ms MS]
+$CLI wake --to RECIPIENT --to-exec orca:TERM_HANDLE [--id EVT] [--orca PATH] [--cooldown S] [--idle-ms MS]   # 복구·재시도
+```
+
+- **대상:** 수신 실행이 정확히 `orca:<terminal handle>`일 때만 지원한다. wake로 깨울 메인은 `--exec orca:<자기 terminal handle>`로 `ref wait/claim`해야 한다(참여자 주소는 그대로 `orca:<handle>` 등). `recipient_exec` 없음·`orca-run:`·`kiro:` 등 다른 주소는 `wake_skipped(not_orca)`, `supported: false`로 pull만 지원한다.
+- **순서:** ① 짧은 읽기 트랜잭션에서 그 수신자·실행에 미처리 이벤트(`queued` 또는 lease 만료 `claimed`; `--id`면 그 이벤트)가 있는지와 중복 억제를 확인 → ② `orca terminal show`가 성공하고 orphaned/exitCause/disconnected/not writable이 아닌지 → ③ `orca terminal wait --for tui-idle --timeout-ms MS`(기본 2000) → ④ ①을 다시 확인 → ⑤ 고정 문구 한 줄을 `orca terminal send --text ... --enter`로 한 번 보낸다. 새 turn에서 바로 실행할 수 있도록 문구에는 발행 프로세스가 실제로 쓰는 원장의 절대 경로 명령(이 venv의 `sys.executable`, `-m scheduler`, 절대 `--config`·`--state`, `shlex.quote` 처리)과 `ref wait --as TO --exec TO_EXEC --timeout 60`을 넣고, 이어서 그 claim token으로 `ref read/processed/ack`하고 검토하라, 이 줄은 이벤트 내용이 아니다라고 안내한다. 이벤트 본문·Task 내용은 넣지 않는다. 예:
+
+  ```text
+  [scheduler ref wake] Pending Task-item reference event(s) for you on this ledger. Run: /abs/orchestration/.venv/bin/python -m scheduler --config /abs/.runtime/scheduler.json --state /abs/.runtime/scheduler ref wait --as orca:term_H --exec orca:term_H --timeout 60 ; then with that claim token run ref read, ref processed and ref ack (same prefix and identity) and review the result. This line is not the event content.
+  ```
+
+  Orca 호출은 DB 트랜잭션 밖에서 한다.
+- **작업 중이면 보내지 않는다:** tui-idle timeout은 `wake_skipped(busy)`이며 아무것도 보내지 않는다. 작업 중인 Kiro에 입력하면 새 turn이 아니라 실행 중 turn의 LIVE STEERING이 되기 때문이다. 이벤트는 저장된 채 수신자의 다음 `ref wait/claim`을 기다린다. 이미 live claim이 있으면 `no_pending`이다.
+- **중복 억제:** 같은 수신 실행에 대한 최근 `wake_requested`(또는 결과를 알 수 없는 `send_unknown`)가 그 실행의 이후 `ref.claimed` 없이 cooldown(기본 600초, 설정 `ref_wake_cooldown` 또는 `--cooldown`)보다 새로우면 `wake_skipped(duplicate)`. 수신자가 claim하면 다음 이벤트는 다시 깨울 수 있다.
+- **실패:** `wake_failed`의 reason은 `orca_unavailable`(실행 파일 없음·비 JSON·timeout, `supported: false`), `terminal_stale`, `terminal_orphaned`, `show_failed`, `idle_check_failed`, `send_rejected`, `send_unknown`(전송 중 transport 실패; 자동 재전송하지 않으며 중복 억제에 포함)이다. 어느 경우도 이벤트는 그대로 저장·claim 가능하다. `publish --wake`는 commit 뒤에 wake하므로 wake가 실패하거나 예외가 나도 `stored: true`와 exit 0을 유지하고 결과를 `wake` 필드에 둔다.
+- **Orca 실행 파일:** `--orca` > 설정 `orca_command` > PATH의 `orca`. 시험은 PATH나 `--orca`로 가짜 실행 파일을 주입한다.
+
+**네 상태는 서로 다르다.** 출력의 `delivery`는 wake를 보냈을 때만 `input_accepted`이고 그 외에는 `pull`이며, `not_proven`은 항상 `turn_started`, `processing_acked`, `task_accepted`다.
+
+| 상태 | 근거 | 이 명령이 증명하는가 |
+| --- | --- | --- |
+| wake 요청 성공 | `ref.wake_requested` + Orca receipt(`accepted`, `stages: [input_accepted]`, `provider`) | 예 — 입력 수락만 |
+| 실제 turn 시작 | 수신 실행의 이후 `ref.claimed` 감사 행, 또는 수신 provider의 session 기록(Kiro jsonl) | 아니오. Kiro에 대해 Orca는 `provider: unsupported`로 turn 시작을 보고하지 못한다 |
+| 처리 ACK | 수신자의 `ref processed` + `ref ack`(`ref.acknowledged`) | 아니오 |
+| Task 수용 | Task owner의 결과 기록·done 선언 | 아니오 |
+
+**지원 조합:** Orca 실행 중 + `orca:<handle>` 수신 실행 + 유휴 TUI → wake 가능(Kiro TUI에서 capability probe로 확인, 제품 코드의 실제 유휴 메인 재개는 미검증). Orca 없음/응답 없음 → `wake_failed(orca_unavailable)`, pull만. 다른 수신 주소 → `wake_skipped(not_orca)`, pull만. Kiro 외 provider의 tui-idle 판별과 wake 동작은 확인하지 않았다.
+
+**복구:** `publish --wake` 결과가 `busy`·`failed`이거나 wake 뒤 수신자가 claim하지 않으면, 이벤트는 저장돼 있으므로 `ref wake --to ... --to-exec orca:H [--id EVT]`를 나중에 다시 실행한다(cooldown 안이면 `duplicate`). 오래된 handle은 `terminal_stale`/`terminal_orphaned`로 끝나고 세션을 재생성하지 않는다. 수신자가 끝내 깨지 않으면 기존대로 수신자가 직접 `ref wait`한다.
+
+**한계:** tui-idle 확인과 send는 원자적이지 않다. 그 사이 사용자 입력이나 다른 turn이 시작되면 wake 문구가 steering으로 합쳐질 수 있다. 동시에 두 발신자가 wake하면 ①/④ 검사 사이 창에서 중복 전송이 가능하다(짧은 창, 잠금 없음). wake 문구 자체는 답·완료 근거가 아니다.
+
 ## 저장과 한계
 
 SQLite에 `ref_events` 테이블 하나를 추가한다(envelope·상태·token·처리 결과·ACK token을 한 행에). 감사는 기존 `message_audit`에 `ref:<id>` / `ref.<action>`으로 남긴다. 기존 `messages`/`processing_results`는 attempt에 묶인 id 공간과 acceptance gate가 있어 섞지 않았다. 설정 hash pin은 기존 원장 규칙을 따른다.
 
 Markdown 저장과 SQLite commit은 원자적이지 않다. commit 직전 재검사 뒤에도 파일이 바뀔 수 있으며, 그 경우 claim/read/processed의 재검사가 held로 막는다. 파일 저장 후 publish 실패는 같은 ID로 재발신하거나 명시적으로 재조정한다. 참여자 신원은 인증되지 않는다.
 
-**활성 대기 한계:** 전달은 pull이다. 수신자가 활성 세션에서 `wait`/`claim`을 실행하고 있을 때만 사용자 재촉 없이 처리된다. 종료되거나 idle 상태인 세션을 깨우거나 다시 실행하지 않으며, 그 경우 이벤트는 저장된 채 다음 poll까지 남는다. 다른 채널(예: Orca native ask)로 상대의 주의를 끄는 것은 가능하지만 그 채널의 내용은 이 기능의 답·완료 근거가 아니다. Task 항목을 수정하기만 해서는 이벤트가 생기지 않으며 `publish`를 명시적으로 실행해야 한다. 승인 대기나 중단을 자동으로 감지·알리는 hook이 없고, 일반 scheduler attempt TUI와의 통합도 없다. 검증 범위: [검증 보고서](project-scheduler-validation.md#task-item-reference-events).
+**활성 대기 한계:** 전달은 pull이다. 수신자가 활성 세션에서 `wait`/`claim`을 실행하고 있을 때만 사용자 재촉 없이 처리된다. 종료된 세션을 다시 실행하지 않는다. idle 상태의 `orca:<handle>` 수신 실행에 한해 발신자가 `publish --wake`/`ref wake`로 주의 입력 한 번을 보낼 수 있지만(위 절), 그 외에는 이벤트가 저장된 채 다음 poll까지 남는다. 다른 채널(예: Orca native ask)로 상대의 주의를 끄는 것은 가능하지만 그 채널의 내용은 이 기능의 답·완료 근거가 아니다. Task 항목을 수정하기만 해서는 이벤트가 생기지 않으며 `publish`를 명시적으로 실행해야 한다. 승인 대기나 중단을 자동으로 감지·알리는 hook이 없고, 일반 scheduler attempt TUI와의 통합도 없다. 검증 범위: [검증 보고서](project-scheduler-validation.md#task-item-reference-events).

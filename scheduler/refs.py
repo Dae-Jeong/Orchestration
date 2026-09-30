@@ -10,9 +10,12 @@ import math
 import os
 from pathlib import Path
 import re
+import shlex
+import sys
 import time
 import uuid
 
+from . import adapters
 from .messaging import nonempty
 from .model import Invalid, digest
 from .protocol_store import RefStore, packed
@@ -25,6 +28,14 @@ CLOSE = re.compile(r'<!-- /item:(' + ITEM_ID + r') -->[ \t]*\r?')
 MARKER = re.compile(r'^[ \t]*<!--\s*/?\s*item\s*:', re.I)
 PARTICIPANT = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.:@/-]{0,199}')
 DONE = ('acked', 'dismissed')
+WAKE_COOLDOWN = 600.0  # seconds; config `ref_wake_cooldown` or --cooldown
+WAKE_IDLE_MS = 2000    # short tui-idle probe; a timeout means busy and nothing is sent
+# One fixed prompt. It names only the addressee; the event content stays in the Task.
+WAKE_PROMPT = ('[scheduler ref wake] Pending Task-item reference event(s) for you on this ledger. Run: '
+               '{cli} ref wait --as {to} --exec {exec} --timeout 60 ; then with that claim token run ref read, '
+               'ref processed and ref ack (same prefix and identity) and review the result. '
+               'This line is not the event content.')
+UNPROVEN = ('turn_started', 'processing_acked', 'task_accepted')
 
 
 def items(text):
@@ -372,3 +383,95 @@ class References:
         with self.store.transaction(write=False):
             row = self.row(ident)
             return dict(event=self.view(row), replies=[self.view(r) for r in self.events.replies(ident)])
+
+    # ---- best-effort wake of an idle Orca recipient ---------------------------
+    def _wake_gate(self, to, to_exec, ident, cooldown):
+        """(event id or None, skip reason or None) from one short read of the ledger."""
+        now = self.clock()
+        rows = [r for r in self.events.pending(to, to_exec) if r['state'] == 'queued' or
+                (r['state'] == 'claimed' and r['expires'] <= now)]  # unprocessed and not being worked on
+        if ident is not None:
+            rows = [r for r in rows if r['id'] == ident]
+        if not rows:
+            return ident, 'no_pending'
+        db = self.events.db
+        last = db.execute("SELECT rowid AS n,created FROM message_audit WHERE action IN ('ref.wake_requested','ref.wake_failed') "
+                          "AND json_extract(detail,'$.to_exec')=? AND json_extract(detail,'$.sent') IN ('yes','unknown') "
+                          'ORDER BY rowid DESC LIMIT 1', (to_exec,)).fetchone()
+        if last and now - last['created'] < cooldown and not db.execute(
+                "SELECT 1 FROM message_audit WHERE action='ref.claimed' AND rowid>? AND json_extract(detail,'$.exec')=?",
+                (last['n'], to_exec)).fetchone():
+            return rows[0]['id'], 'duplicate'
+        return rows[0]['id'], None
+
+    def wake(self, to, to_exec, ident=None, orca='orca', cooldown=None, idle_ms=WAKE_IDLE_MS, by=None):
+        """Send ONE fixed prompt to an idle `orca:<handle>` recipient execution; never to a busy one.
+
+        Best effort and outside any event transaction: it never changes event state. A sent
+        prompt is only Orca `input_accepted`; turn start, processing ACK and Task acceptance
+        are separate facts (the recipient's own `ref.claimed`/`ref.acknowledged`, the owner).
+        """
+        participant(to, 'recipient')
+        if to_exec is not None:
+            participant(to_exec, 'recipient execution identity')
+        cooldown = float(self.catalog.config.get('ref_wake_cooldown', WAKE_COOLDOWN) if cooldown is None else cooldown)
+        if not (math.isfinite(cooldown) and cooldown >= 0) or not (isinstance(idle_ms, int) and 0 < idle_ms <= 60000):
+            raise Invalid('cooldown must be >= 0 seconds and idle_ms 1..60000')
+        base = dict(to=to, to_exec=to_exec, by=by, not_proven=list(UNPROVEN))
+
+        def done(action, reason=None, event=None, sent='no', **extra):
+            detail = dict(base, reason=reason, sent=sent, **extra)
+            with self.store.transaction():
+                self.events.audit(event or 'wake:' + (to_exec or to), action, detail, self.clock())
+            state = action.split('_')[1]
+            supported = not (reason == 'not_orca' or str(reason).startswith('orca_unavailable'))
+            return dict(detail, state=action, wake=state, event=event, supported=supported,
+                        delivery='input_accepted' if state == 'requested' else 'pull',
+                        note='wake is attention only; the recipient still pulls, verifies and ACKs the event')
+
+        if not to_exec or not to_exec.startswith('orca:') or len(to_exec) == 5:
+            return done('wake_skipped', 'not_orca', ident)  # unsupported: pull only
+        handle = to_exec[5:]
+        with self.store.transaction(write=False):
+            event, skip = self._wake_gate(to, to_exec, ident, cooldown)
+        if skip:
+            return done('wake_skipped', skip, event)
+        body, error = adapters._orca_json(orca, ['show', '--terminal', handle], 15)
+        if body is None:
+            return done('wake_failed', 'orca_unavailable: ' + error, event)
+        terminal = (body.get('result') or {}).get('terminal') if body.get('ok') is True else None
+        if not isinstance(terminal, dict):
+            code = adapters._error_code(body)
+            return done('wake_failed', 'terminal_stale' if code == adapters.STALE_HANDLE else 'show_failed: %s' % code, event)
+        if terminal.get('orphaned') or terminal.get('exitCause') or terminal.get('connected') is False \
+                or terminal.get('writable') is False:
+            return done('wake_failed', 'terminal_orphaned', event, exitCause=terminal.get('exitCause'))
+        body, error = adapters._orca_json(orca, ['wait', '--terminal', handle, '--for', 'tui-idle',
+                                                 '--timeout-ms', str(idle_ms)], idle_ms / 1000 + 15)
+        if body is None:
+            return done('wake_failed', 'idle_check_failed: ' + error, event)
+        if body.get('ok') is not True:
+            code = adapters._error_code(body)
+            if code == 'timeout':
+                return done('wake_skipped', 'busy', event)  # event stays stored for the recipient's own poll
+            return done('wake_failed', 'idle_check_failed: %s' % code, event)
+        with self.store.transaction(write=False):  # recheck right before the only send
+            event, skip = self._wake_gate(to, to_exec, ident, cooldown)
+        if skip:
+            return done('wake_skipped', skip, event)
+        # Self-sufficient for a fresh turn: the exact interpreter (venv path, not resolved) and the
+        # absolute config/state this process uses. Identities match PARTICIPANT, so they need no quoting.
+        cli = shlex.join([os.path.abspath(sys.executable), '-m', 'scheduler', '--config', str(self.catalog.path),
+                          '--state', str(self.store.root)])
+        prompt = WAKE_PROMPT.format(cli=cli, to=shlex.quote(to), exec=shlex.quote(to_exec))
+        body, error = adapters._orca_json(orca, ['send', '--terminal', handle, '--text', prompt, '--enter'], 30)
+        if body is None:  # input may or may not have been written; never resend automatically
+            return done('wake_failed', 'send_unknown: ' + error, event, sent='unknown')
+        send = (body.get('result') or {}).get('send') if body.get('ok') is True else None
+        if not isinstance(send, dict) or send.get('accepted') is not True:
+            return done('wake_failed', 'send_rejected: %s' % adapters._error_code(body), event)
+        prompt_receipt = send.get('prompt') if isinstance(send.get('prompt'), dict) else {}
+        receipt = dict(accepted=True, stages=prompt_receipt.get('stages'), provider=prompt_receipt.get('provider'),
+                       observation=prompt_receipt.get('observation'), request=prompt_receipt.get('requestId'),
+                       incarnation=prompt_receipt.get('processIncarnation'), warnings=(body.get('result') or {}).get('warnings'))
+        return done('wake_requested', None, event, sent='yes', receipt=receipt)

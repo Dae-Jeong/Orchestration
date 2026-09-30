@@ -23,6 +23,10 @@ def main():
     watch.add_argument("--interval", type=float, default=2, help="seconds between refreshes")
     watch.add_argument("--once", action="store_true", help="print one plain frame and exit (2 on query failure)")
     watch.add_argument("--width", type=int, help="columns for shortening long values; 0 disables (default: terminal width on a TTY, else 0)")
+    watch.add_argument("--project", action="append", default=[], help="show only this project id (repeat); applies to every source")
+    watch.add_argument("--json", action="store_true", help="print the same overview data as JSON (one object per refresh)")
+    watch.add_argument("--sessions", default=str(8), metavar="N|all", help="SESSIONS rows on screen, newest bind first (default 8; --json keeps all)")
+    watch.add_argument("--harness-root", help="vault root for the read-only `harness work status` query (default: config harness_root; absent = unavailable)")
     apply = sub.add_parser("apply-plan")
     apply.add_argument("response", help="JSON file returned by the high-level planner")
     event = sub.add_parser("event")
@@ -76,18 +80,27 @@ def main():
             command.add_argument('--inbox-seq', type=int, required=True)
     ref = sub.add_parser('ref', help='Task-item reference events (question/answer/completed/blocked); see docs/scheduler-task-events.md')
     ref_verbs = ref.add_subparsers(dest='verb', required=True)
-    for verb in ('item', 'publish', 'inbox', 'claim', 'wait', 'read', 'processed', 'ack', 'dismiss', 'show'):
+    for verb in ('item', 'publish', 'inbox', 'claim', 'wait', 'read', 'processed', 'ack', 'dismiss', 'show', 'wake'):
         command = ref_verbs.add_parser(verb)
         if verb in ('item', 'publish'):
             command.add_argument('--task', required=True, help='PROJECT/TASK_ID')
             command.add_argument('--path', required=True, help='Task file (direct child of the project tasks dir)')
             command.add_argument('--item', required=True)
-        if verb in ('publish', 'inbox', 'claim', 'wait', 'read', 'processed', 'ack', 'dismiss'):
+        if verb in ('publish', 'inbox', 'claim', 'wait', 'read', 'processed', 'ack', 'dismiss', 'wake'):
             command.add_argument('--as', dest='who', default=os.environ.get('SCHEDULER_REF_AS'), help='participant address')
             command.add_argument('--exec', dest='execution', default=os.environ.get('SCHEDULER_REF_EXEC'), help='execution identity')
         if verb in ('publish', 'read', 'processed', 'ack', 'dismiss', 'show'):
             command.add_argument('--id', required=True)
+        if verb in ('publish', 'wake'):
+            command.add_argument('--orca', help='Orca executable (default: config orca_command, else orca on PATH)')
+            command.add_argument('--cooldown', type=float, help='seconds a prior unclaimed wake suppresses another (default: config ref_wake_cooldown or 600)')
+            command.add_argument('--idle-ms', type=int, default=2000, help='tui-idle probe; timeout = busy, nothing sent')
+        if verb == 'wake':
+            command.add_argument('--to', required=True)
+            command.add_argument('--to-exec', required=True, help='orca:<terminal handle>; anything else is pull-only')
+            command.add_argument('--id', help='wake only if this event is still unprocessed')
         if verb == 'publish':
+            command.add_argument('--wake', action='store_true', help='after the commit, best-effort wake an idle orca:<handle> recipient')
             command.add_argument('--kind', choices=['question.opened', 'question.answered', 'work.completed', 'work.blocked'], required=True)
             command.add_argument('--to', required=True)
             command.add_argument('--to-exec')
@@ -113,8 +126,12 @@ def main():
         # Dispatched before Scheduler(): a missing state path is reported, not created.
         if not args.interval > 0 or (args.width is not None and args.width < 0):
             parser.error('watch --interval must be positive and --width non-negative')
+        if args.sessions != 'all' and not (args.sessions.isdigit() and int(args.sessions) > 0):
+            parser.error('watch --sessions must be a positive integer or all')
         from .watch import watch as view
-        return view(args.config, args.state, args.interval, args.once, args.width)
+        return view(args.config, args.state, args.interval, args.once, args.width, projects=args.project,
+                    harness_root=args.harness_root, as_json=args.json,
+                    sessions_cap=None if args.sessions == 'all' else int(args.sessions))
     scheduler = None
     try:
         scheduler = Scheduler(args.config, args.state)
@@ -177,12 +194,23 @@ def ref_action(scheduler, args):
         return refs.item(args.task, args.path, args.item)
     if args.verb == 'show':
         return refs.show(args.id)
+    if args.verb == 'wake':
+        return refs.wake(args.to, args.to_exec, args.id, **wake_options(scheduler, args))
     if not args.who or not args.execution:
         raise Invalid('ref operations require --as and --exec (or SCHEDULER_REF_AS/SCHEDULER_REF_EXEC)')
     me = (args.who, args.execution)
     if args.verb == 'publish':
-        return refs.publish(args.id, args.kind, args.task, args.path, args.item, *me, args.to,
-                            args.to_exec, args.reply_to, args.sha256)
+        result = refs.publish(args.id, args.kind, args.task, args.path, args.item, *me, args.to,
+                              args.to_exec, args.reply_to, args.sha256)
+        if args.wake:  # runs after the commit; a wake problem never changes `stored`
+            event = result['event']
+            try:
+                result['wake'] = refs.wake(event['recipient'], event['recipient_exec'], event['id'],
+                                           **wake_options(scheduler, args))
+            except Exception as exc:  # noqa: BLE001 - best effort by contract
+                result['wake'] = dict(state='wake_failed', wake='failed', reason='wake error: %s' % exc,
+                                      delivery='pull', event=event['id'])
+        return result
     if args.verb == 'inbox':
         return refs.inbox(*me)
     if args.verb == 'claim':
@@ -198,6 +226,11 @@ def ref_action(scheduler, args):
     with open(args.report_file) as stream:
         report = json.load(stream)
     return refs.processed(args.id, *me, args.token, args.outcome, report, args.reconciliation)
+
+
+def wake_options(scheduler, args):
+    by = '%s %s' % (args.who, args.execution) if args.who and args.execution else None
+    return dict(orca=args.orca or scheduler.orca, cooldown=args.cooldown, idle_ms=args.idle_ms, by=by)
 
 
 def message_action(mailbox, args):

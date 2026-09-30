@@ -51,6 +51,7 @@ class Fixture(unittest.TestCase):
         self.config = self.root / "config.json"
         self.state = self.root / "state"
         self.config.write_text(json.dumps({"adapter": self.adapter, "command": self.command(),
+            "orca_command": str(self.root / "no-orca"),  # hermetic: the viewer never reaches a real Orca
             "projects": [{"id": "a", "repo": str(self.root / "a"), "tasks": str(self.root / "a" / "tasks")}]}))
         self.task()
 
