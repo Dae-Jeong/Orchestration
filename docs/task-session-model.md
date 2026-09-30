@@ -105,7 +105,7 @@ sequenceDiagram
 3. worker가 `ref wait`로 답을 받아 hash 검증된 본문을 적용하고 `processed applied`·`ack`를 기록한 뒤 작업을 재개한다. 막히면 `work.blocked`, 끝나면 `work.completed`를 보낸다.
 4. 메인이 완료 이벤트를 받아 실제 결과를 검토하고 Task 수용을 결정한다. ACK는 처리 기록이지 Task 완료가 아니다.
 
-명령·상태·hash 규칙은 [Task 항목 참조 이벤트](scheduler-task-events.md)가 소유한다. 전달은 pull 방식이라 수신자가 활성 세션에서 `wait`를 실행해야 한다. Task 수정만으로 이벤트가 publish되지 않고, idle 세션을 깨우는 기능·승인 대기 감지 hook·일반 TUI와 scheduler attempt의 통합은 없다. 실제 왕복은 Claude·Kiro worker에서 성공했고 Codex worker는 readiness 확인 실패로 검증되지 않았다([검증 범위](project-scheduler-validation.md#task-item-reference-events)).
+명령·상태·hash 규칙은 [Task 항목 참조 이벤트](scheduler-task-events.md)가 소유한다. 전달은 pull 방식이라 수신자가 활성 세션에서 `wait`를 실행해야 한다. Task 수정만으로 이벤트가 publish되지 않는다. 수신 실행이 `orca:<terminal handle>`이면 `ref publish --wake`로 유휴 terminal에 고정 문구 한 번을 보낼 수 있다. 이 wake는 best effort이며 유휴 메인의 실제 재개는 미검증이다([wake](scheduler-task-events.md#유휴-orca-수신자-wakebest-effort)). 승인 대기 감지 hook과 일반 TUI·scheduler attempt의 통합은 없다. 진행 조회는 [`watch`](project-scheduler.md#터미널-진행-조회-watch)가 맡는다. 실제 왕복은 Claude·Kiro worker에서 성공했고 Codex worker는 readiness 확인 실패로 검증되지 않았다([검증 범위](project-scheduler-validation.md#task-item-reference-events)).
 
 ## 적용 범위와 근거
 
