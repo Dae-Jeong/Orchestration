@@ -86,37 +86,9 @@ Obsidian에서 여러 세션을 열어도 **각 세션의 대상 repo·Task·담
 
 정본은 셋으로 나뉜다. **업무 상태는 Task Markdown**, **실행·전달 상태는 scheduler 원장(SQLite)**, **세션과 Task·terminal의 연결은 harness `work_sessions`**에 둔다. Orca는 terminal과 dispatch 실행을 제공할 뿐 업무 상태를 소유하지 않는다. `watch`는 넷을 모두 읽기만 하고 아무것도 쓰지 않는다.
 
-```mermaid
-flowchart LR
-    P["worker·메인 세션"]
-    subgraph VAULT["Obsidian vault"]
-        T["Task Markdown<br/>frontmatter·본문<br/>item marker + SHA-256"]
-        H[("harness hook-state<br/>work_sessions<br/>agent:session · Task · terminal")]
-    end
-    subgraph STATE["scheduler state"]
-        DB[("ledger.sqlite3<br/>attempts · messages<br/>ref_events · message_audit")]
-        AT["attempts/UUID<br/>spec · started · exited 영수증"]
-    end
-    O["Orca<br/>terminals · dispatch runs"]
-    S["scheduler run·tick"]
-    R["scheduler ref CLI"]
-    W["watch 조회 전용"]
+[![내부 동작: 정본 셋과 쓰기·조회 경로](docs/images/internal-data-flow.png)](docs/images/internal-data-flow.png)
 
-    P -->|"항목 append·결과 기록"| T
-    P -->|"work bind"| H
-    P -->|"publish·wait·read·processed·ack"| R
-    S -->|"Task 읽기·배정·영수증 수집"| DB
-    S -->|"launch"| O
-    O -->|"worker 실행"| AT
-    R -->|"item hash 계산·재검증"| T
-    R -->|"envelope·상태·감사"| DB
-    R -->|"wake: show → tui-idle → send"| O
-    W -.->|"frontmatter·item hash"| T
-    W -.->|"SQLite mode=ro"| DB
-    W -.->|"영수증 stat·읽기"| AT
-    W -.->|"harness work status CLI"| H
-    W -.->|"status · terminal list · worker-list"| O
-```
+[SVG 원본](docs/images/internal-data-flow.svg)
 
 - **참조 이벤트:** 본문은 Task 항목에만 있고 원장 `ref_events`에는 Task·item ID·hash와 전달 상태만 둔다. claim·read·processed 때마다 hash를 다시 계산해 다르면 내용을 주지 않고 `held`로 둔다. 전달은 수신자가 `ref wait/claim`하는 pull이다([참조 이벤트](docs/scheduler-task-events.md)).
 - **idle wake:** 수신 실행이 `orca:<terminal handle>`일 때만, 유휴 terminal에 원장 명령이 담긴 고정 문구 한 줄을 한 번 보낸다. 이벤트 상태는 바꾸지 않고 결과만 `message_audit`에 남긴다.
@@ -124,49 +96,9 @@ flowchart LR
 
 worker 완료 보고부터 Task 수용까지 한 번의 왕복은 다음과 같다. 단계마다 증명하는 범위가 다르다.
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant WK as worker
-    participant T as Task Markdown
-    participant C as ref CLI
-    participant DB as 원장 SQLite
-    participant O as Orca
-    participant M as 메인 orca terminal
+[![worker 완료 보고부터 Task 수용까지: publish → wake 관문 → claim → read → ack → owner 수용](docs/images/ref-wake-sequence.png)](docs/images/ref-wake-sequence.png)
 
-    WK->>T: 결과 항목 append
-    WK->>C: ref publish --wake work.completed to-exec orca:handle
-    C->>T: 항목 읽기·SHA-256
-    C->>DB: ref_events 저장
-    Note over C,DB: stored true = 저장만 증명
-    C->>DB: ① 미처리 이벤트·중복 억제 확인
-    C->>O: ② terminal show (stale·orphaned 아님)
-    C->>O: ③ terminal wait --for tui-idle
-    alt 유휴
-        C->>DB: ④ 미처리 재확인
-        C->>O: ⑤ terminal send 고정 문구 한 줄
-        O-->>C: receipt stages input_accepted
-        C->>DB: message_audit ref.wake_requested
-        Note over C,O: 입력 수락만 증명 (turn 시작 아님)
-        O->>M: 문구 입력으로 새 turn
-    else 작업 중·미처리 없음·cooldown 안
-        C->>DB: ref.wake_skipped busy·no_pending·duplicate
-        Note over O,M: 보내지 않음. 이벤트는 다음 ref wait까지 저장
-    else Orca 없음·terminal stale
-        C->>DB: ref.wake_failed (이벤트는 claim 가능)
-    end
-    M->>C: ref wait --exec orca:handle
-    C->>DB: ref.claimed
-    Note over M,DB: 수신 turn 시작의 근거
-    M->>C: ref read token
-    C->>T: hash 재검증, 다르면 held
-    C-->>M: 검증된 본문
-    M->>C: ref processed applied 후 ref ack
-    C->>DB: ref.acknowledged
-    Note over M,DB: 처리 ACK (질문 해결·done 아님)
-    M->>T: owner가 결과 검증 후 Current Result·done + evidence
-    Note over M,T: Task 수용은 owner 선언만
-```
+[SVG 원본](docs/images/ref-wake-sequence.svg)
 
 `input_accepted`는 Orca가 입력을 받았다는 뜻일 뿐이다. turn 시작은 수신자의 이후 `ref.claimed`로, 처리는 `ref.acknowledged`로, 완료는 Task owner의 기록으로 각각 따로 확인한다([네 상태 구분](docs/scheduler-task-events.md#유휴-orca-수신자-wakebest-effort)). `watch`는 이 과정의 WAITING·PROBLEMS(held·stale·`wake_failed`·반복 `busy`)를 보여 주지만 CLI 승인 대기는 감지하지 못해 `unsupported`로 표시한다.
 
@@ -211,7 +143,7 @@ Orca에서 Obsidian 경로로 시작한 Codex·Claude 새 세션이 공통 skill
 - `scheduler/` — compact scheduler CLI·실행 원장·adapter·계획 검증
 - `skills/project-orchestrator/` — 프로젝트 탐색·Task 실행 진입 skill
 - `docs/` — 현재 운영 모델, 측정 기준, 가상 사례와 외부 방식 비교
-- `docs/images/task-session-flow.*` — README 구성도와 편집 가능한 SVG 원본
+- `docs/images/*.png`·`*.svg` — README 구성도(`task-session-flow`, `internal-data-flow`, `ref-wake-sequence`)와 편집 가능한 SVG 원본
 - `skills/squad-model/`, `scripts/`, `examples/`, `tests/` — 이전 역할·계약 중심 실험과 검증 도구
 
 Paperclip 관련 스크립트와 npm 의존성은 이전 실험용으로 보존한다. 현재 Task·세션 모델을 읽고 적용하는 데 Paperclip 설치는 필요하지 않다. 중앙 wiki·harness 연결은 [외부 환경 안내](docs/external-dependencies.md)를 참고한다.

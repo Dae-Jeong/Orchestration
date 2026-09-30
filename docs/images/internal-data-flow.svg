@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="880" viewBox="0 0 1440 880" role="img" aria-labelledby="title desc"><title id="title">내부 동작 · 정본과 쓰기·조회 경로</title><desc id="desc">worker와 메인 세션은 Task Markdown에 항목을 기록하고 harness work_sessions에 bind하며 scheduler ref CLI를 호출한다. ref CLI는 Task 항목 hash를 계산·재검증하고 원장 SQLite(attempts, messages, ref_events, message_audit)에 envelope·상태·감사를 쓰며 Orca에 wake를 보낸다. scheduler run·tick은 Task를 읽어 배정하고 영수증을 원장에 수집하며 Orca로 worker를 launch하고, Orca 실행은 attempts/UUID 영수증을 남긴다. watch는 Task, harness, 원장, 영수증, Orca를 읽기만 한다.</desc><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#78979e" stroke-width="1.5"/></marker></defs><style>text{font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif;fill:#23434d}.title{font-size:32px;font-weight:700}.head{font-size:24px;font-weight:700}.body{font-size:20px;fill:#58747d}.small{font-size:18px;fill:#58747d}</style><rect width="1440" height="880" fill="white"/>
+<text x="48" y="53" class="title" text-anchor="start">정본은 셋으로 나누고, watch는 읽기만 한다</text>
+<text x="48" y="87" class="body" text-anchor="start">업무 상태는 Task · 실행·전달은 원장 · 세션 연결은 harness · 실선은 쓰기·실행, 점선은 조회</text>
+<rect x="48" y="120" width="352" height="130" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="72" y="159" class="head" text-anchor="start">worker · 메인 세션</text>
+<text x="72" y="196" class="body" text-anchor="start">항목 기록 · work bind</text>
+<text x="72" y="225" class="body" text-anchor="start">ref 명령 호출</text>
+<rect x="520" y="120" width="340" height="130" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="544" y="159" class="head" text-anchor="start">scheduler ref CLI</text>
+<text x="544" y="196" class="body" text-anchor="start">publish · wait · read</text>
+<text x="544" y="225" class="body" text-anchor="start">processed · ack · wake</text>
+<rect x="960" y="120" width="432" height="130" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="984" y="159" class="head" text-anchor="start">Orca</text>
+<text x="984" y="196" class="body" text-anchor="start">terminals · dispatch runs</text>
+<text x="984" y="225" class="body" text-anchor="start">실행만 제공 · 업무 상태 소유 안 함</text>
+<path d="M400 185 H520" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="460" y="173" class="small" text-anchor="middle">ref 명령</text>
+<path d="M860 185 H960" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="910" y="173" class="small" text-anchor="middle">wake</text>
+<rect x="48" y="330" width="540" height="270" rx="14" fill="#edf7f3" stroke="#8cb8ad" stroke-width="1.7"/>
+<text x="72" y="366" class="head" text-anchor="start">Obsidian vault</text>
+<rect x="72" y="384" width="228" height="196" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="96" y="423" class="head" text-anchor="start">harness</text>
+<text x="96" y="460" class="body" text-anchor="start">hook-state</text>
+<text x="96" y="489" class="body" text-anchor="start">work_sessions</text>
+<text x="96" y="518" class="body" text-anchor="start">agent:session</text>
+<text x="96" y="547" class="body" text-anchor="start">Task · terminal</text>
+<rect x="336" y="384" width="228" height="196" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="360" y="423" class="head" text-anchor="start">Task Markdown</text>
+<text x="360" y="460" class="body" text-anchor="start">frontmatter · 본문</text>
+<text x="360" y="489" class="body" text-anchor="start">item marker</text>
+<text x="360" y="518" class="body" text-anchor="start">SHA-256 hash</text>
+<text x="360" y="547" class="body" text-anchor="start">업무 상태 정본</text>
+<rect x="624" y="384" width="232" height="196" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="648" y="423" class="head" text-anchor="start">ledger.sqlite3</text>
+<text x="648" y="460" class="body" text-anchor="start">attempts</text>
+<text x="648" y="489" class="body" text-anchor="start">messages</text>
+<text x="648" y="518" class="body" text-anchor="start">ref_events</text>
+<text x="648" y="547" class="body" text-anchor="start">message_audit</text>
+<rect x="892" y="384" width="232" height="196" rx="14" fill="#edf7f3" stroke="#8cb8ad" stroke-width="1.7"/>
+<text x="916" y="423" class="head" text-anchor="start">scheduler</text>
+<text x="916" y="460" class="body" text-anchor="start">run · tick</text>
+<text x="916" y="489" class="body" text-anchor="start">Task 읽기 · 배정</text>
+<text x="916" y="518" class="body" text-anchor="start">영수증 수집</text>
+<text x="916" y="547" class="body" text-anchor="start">단일 실행 슬롯</text>
+<rect x="1160" y="384" width="232" height="196" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="1184" y="423" class="head" text-anchor="start">attempts/UUID</text>
+<text x="1184" y="460" class="body" text-anchor="start">spec</text>
+<text x="1184" y="489" class="body" text-anchor="start">started</text>
+<text x="1184" y="518" class="body" text-anchor="start">exited</text>
+<text x="1184" y="547" class="body" text-anchor="start">실행 영수증</text>
+<path d="M270 250 V384" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="258" y="305" class="small" text-anchor="end">work bind</text>
+<path d="M368 250 V384" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="380" y="305" class="small" text-anchor="start">항목 append</text>
+<path d="M540 250 V384" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="552" y="305" class="small" text-anchor="start">item hash 검증</text>
+<path d="M740 250 V384" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="752" y="305" class="small" text-anchor="start">envelope · 상태 · 감사</text>
+<path d="M1040 384 V250" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="1052" y="305" class="small" text-anchor="start">launch</text>
+<path d="M1276 250 V384" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="1264" y="305" class="small" text-anchor="end">worker 실행</text>
+<path d="M892 482 H856" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<rect x="48" y="700" width="1344" height="132" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7" stroke-dasharray="7 5"/>
+<text x="72" y="739" class="head" text-anchor="start">watch · 조회 전용</text>
+<text x="72" y="776" class="body" text-anchor="start">대기 · 문제 · 진행 · 세션 네 구역을 보여 주고 아무것도 쓰지 않는다</text>
+<text x="72" y="805" class="body" text-anchor="start">세션↔terminal은 기록된 orca:&lt;handle&gt;이 live handle과 같을 때만 연결 · 근거가 없으면 session unknown</text>
+<path d="M186 700 V580" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)" stroke-dasharray="7 5"/>
+<text x="198" y="650" class="small" text-anchor="start">work status</text>
+<path d="M450 700 V580" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)" stroke-dasharray="7 5"/>
+<text x="462" y="650" class="small" text-anchor="start">frontmatter · hash</text>
+<path d="M740 700 V580" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)" stroke-dasharray="7 5"/>
+<text x="752" y="650" class="small" text-anchor="start">SQLite mode=ro</text>
+<path d="M1142 700 V250" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)" stroke-dasharray="7 5"/>
+<text x="1130" y="650" class="small" text-anchor="end">status · terminal list</text>
+<path d="M1276 700 V580" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)" stroke-dasharray="7 5"/>
+<text x="1288" y="650" class="small" text-anchor="start">stat · 읽기</text>
+</svg>

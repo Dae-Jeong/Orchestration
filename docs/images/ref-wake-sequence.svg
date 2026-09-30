@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1840" viewBox="0 0 1440 1840" role="img" aria-labelledby="title desc"><title id="title">worker 완료 보고부터 Task 수용까지의 참조 이벤트 왕복</title><desc id="desc">worker가 Task에 결과 항목을 append하고 ref publish --wake를 호출한다. ref CLI는 항목 SHA-256을 계산해 원장 ref_events에 저장하고, 미처리·중복 억제 확인, terminal show, tui-idle 대기, 미처리 재확인, terminal send 다섯 관문을 거친다. 유휴이면 Orca가 input_accepted receipt를 돌려주고 ref.wake_requested를 감사에 남기며, 이는 입력 수락만 증명한다. 작업 중·미처리 없음·cooldown이면 ref.wake_skipped, Orca 없음·stale이면 ref.wake_failed를 남긴다. 메인은 ref wait로 claim해 turn 시작을 증명하고, ref read로 hash가 재검증된 본문을 받고, processed와 ack로 처리 ACK를 남긴다. Task 수용은 owner가 결과를 검증해 Current Result와 done을 기록할 때만 이루어진다.</desc><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#78979e" stroke-width="1.5"/></marker></defs><style>text{font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif;fill:#23434d}.title{font-size:32px;font-weight:700}.head{font-size:22px;font-weight:700}.body{font-size:20px;fill:#58747d}.small{font-size:18px;fill:#58747d}.lbl{font-size:18px;fill:#58747d;paint-order:stroke;stroke:white;stroke-width:6px;stroke-linejoin:round}.cond{font-size:18px;font-weight:700;fill:#23434d}.note{font-size:18px;fill:#23434d}</style><rect width="1440" height="1840" fill="white"/>
+<text x="48" y="53" class="title" text-anchor="start">완료 보고부터 Task 수용까지, 단계마다 증명이 다르다</text>
+<text x="48" y="87" class="body" text-anchor="start">wake는 입력 수락까지만 · turn 시작은 claim · 처리는 ack · 완료는 owner 기록</text>
+<!-- lifelines -->
+<path d="M160 190 V1790" fill="none" stroke="#bdd1d8" stroke-width="1.5" stroke-dasharray="4 6"/>
+<path d="M384 190 V1790" fill="none" stroke="#bdd1d8" stroke-width="1.5" stroke-dasharray="4 6"/>
+<path d="M608 190 V1790" fill="none" stroke="#bdd1d8" stroke-width="1.5" stroke-dasharray="4 6"/>
+<path d="M832 190 V1790" fill="none" stroke="#bdd1d8" stroke-width="1.5" stroke-dasharray="4 6"/>
+<path d="M1056 190 V1790" fill="none" stroke="#bdd1d8" stroke-width="1.5" stroke-dasharray="4 6"/>
+<path d="M1280 190 V1790" fill="none" stroke="#bdd1d8" stroke-width="1.5" stroke-dasharray="4 6"/>
+<!-- participants -->
+<rect x="60" y="120" width="200" height="70" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="160" y="163" class="head" text-anchor="middle">worker</text>
+<rect x="284" y="120" width="200" height="70" rx="14" fill="#edf7f3" stroke="#8cb8ad" stroke-width="1.7"/>
+<text x="384" y="163" class="head" text-anchor="middle">Task Markdown</text>
+<rect x="508" y="120" width="200" height="70" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="608" y="163" class="head" text-anchor="middle">ref CLI</text>
+<rect x="732" y="120" width="200" height="70" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="832" y="163" class="head" text-anchor="middle">원장 SQLite</text>
+<rect x="956" y="120" width="200" height="70" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="1056" y="163" class="head" text-anchor="middle">Orca</text>
+<rect x="1180" y="120" width="200" height="70" rx="14" fill="white" stroke="#bdd1d8" stroke-width="1.7"/>
+<text x="1280" y="163" class="head" text-anchor="middle">메인 terminal</text>
+<!-- publish -->
+<path d="M160 240 H384" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="172" y="230" class="lbl" text-anchor="start">결과 항목 append</text>
+<path d="M160 286 H608" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="172" y="276" class="lbl" text-anchor="start">ref publish --wake</text>
+<path d="M608 332 H384" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="596" y="322" class="lbl" text-anchor="end">항목 읽기 · SHA-256</text>
+<path d="M608 378 H832" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="620" y="368" class="lbl" text-anchor="start">ref_events 저장</text>
+<rect x="560" y="398" width="320" height="42" rx="14" fill="#edf7f3" stroke="#8cb8ad" stroke-width="1.7"/>
+<text x="720" y="425" class="note" text-anchor="middle">stored true = 저장만 증명</text>
+<!-- gates -->
+<path d="M608 486 H832" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="620" y="476" class="lbl" text-anchor="start">① 미처리 · 중복 확인</text>
+<path d="M608 532 H1056" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="620" y="522" class="lbl" text-anchor="start">② terminal show · stale 아님</text>
+<path d="M608 578 H1056" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="620" y="568" class="lbl" text-anchor="start">③ wait --for tui-idle</text>
+<!-- alt frame -->
+<rect x="512" y="604" width="880" height="596" rx="14" fill="none" stroke="#8cb8ad" stroke-width="1.7"/>
+<text x="532" y="634" class="cond" text-anchor="start">[유휴]</text>
+<path d="M608 676 H832" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="620" y="666" class="lbl" text-anchor="start">④ 미처리 재확인</text>
+<path d="M608 722 H1056" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="620" y="712" class="lbl" text-anchor="start">⑤ terminal send 고정 문구 한 줄</text>
+<path d="M1056 768 H608" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)" stroke-dasharray="7 5"/>
+<text x="1044" y="758" class="lbl" text-anchor="end">receipt · input_accepted</text>
+<path d="M608 814 H832" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="620" y="804" class="lbl" text-anchor="start">wake_requested 감사</text>
+<rect x="592" y="834" width="480" height="42" rx="14" fill="#edf7f3" stroke="#8cb8ad" stroke-width="1.7"/>
+<text x="832" y="861" class="note" text-anchor="middle">입력 수락만 증명 · turn 시작은 아님</text>
+<path d="M1056 922 H1280" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="1068" y="912" class="lbl" text-anchor="start">문구 입력 → 새 turn</text>
+<path d="M512 946 H1392" fill="none" stroke="#8cb8ad" stroke-width="1.5" stroke-dasharray="7 5"/>
+<text x="532" y="976" class="cond" text-anchor="start">[작업 중 · 미처리 없음 · cooldown 안]</text>
+<path d="M608 1018 H832" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="620" y="1008" class="lbl" text-anchor="start">ref.wake_skipped</text>
+<rect x="592" y="1038" width="720" height="42" rx="14" fill="#edf7f3" stroke="#8cb8ad" stroke-width="1.7"/>
+<text x="952" y="1065" class="note" text-anchor="middle">busy · no_pending · duplicate → 보내지 않음, 다음 ref wait까지 저장</text>
+<path d="M512 1104 H1392" fill="none" stroke="#8cb8ad" stroke-width="1.5" stroke-dasharray="7 5"/>
+<text x="532" y="1134" class="cond" text-anchor="start">[Orca 없음 · terminal stale]</text>
+<path d="M608 1176 H832" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="620" y="1166" class="lbl" text-anchor="start">ref.wake_failed</text>
+<text x="848" y="1182" class="small" text-anchor="start">이벤트는 계속 claim 가능</text>
+<!-- claim / read / ack -->
+<path d="M1280 1250 H608" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="1268" y="1240" class="lbl" text-anchor="end">ref wait --exec orca:handle</text>
+<path d="M608 1296 H832" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="620" y="1286" class="lbl" text-anchor="start">ref.claimed</text>
+<rect x="560" y="1316" width="320" height="42" rx="14" fill="#edf7f3" stroke="#8cb8ad" stroke-width="1.7"/>
+<text x="720" y="1343" class="note" text-anchor="middle">수신 turn 시작의 근거</text>
+<path d="M1280 1404 H608" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="1268" y="1394" class="lbl" text-anchor="end">ref read token</text>
+<path d="M608 1450 H384" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="596" y="1440" class="lbl" text-anchor="end">hash 재검증 · 다르면 held</text>
+<path d="M608 1496 H1280" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)" stroke-dasharray="7 5"/>
+<text x="620" y="1486" class="lbl" text-anchor="start">검증된 본문</text>
+<path d="M1280 1542 H608" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="1268" y="1532" class="lbl" text-anchor="end">ref processed applied → ref ack</text>
+<path d="M608 1588 H832" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="620" y="1578" class="lbl" text-anchor="start">ref.acknowledged</text>
+<rect x="560" y="1608" width="400" height="42" rx="14" fill="#edf7f3" stroke="#8cb8ad" stroke-width="1.7"/>
+<text x="760" y="1635" class="note" text-anchor="middle">처리 ACK · 질문 해결이나 done 아님</text>
+<!-- owner acceptance -->
+<path d="M1280 1696 H384" fill="none" stroke="#78979e" stroke-width="2" marker-end="url(#a)"/>
+<text x="1268" y="1686" class="lbl" text-anchor="end">owner 결과 검증 → Current Result · done + evidence</text>
+<rect x="336" y="1716" width="400" height="42" rx="14" fill="#edf7f3" stroke="#8cb8ad" stroke-width="1.7"/>
+<text x="536" y="1743" class="note" text-anchor="middle">Task 수용은 owner 선언만</text>
+</svg>
